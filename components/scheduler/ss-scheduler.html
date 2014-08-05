@@ -1,0 +1,139 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html"/>
+
+<polymer-element name="ss-scheduler">
+    <template>
+
+        <!--STYLES / CSS-->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <style>
+
+        </style>
+
+        <!--SEMANTICS-->
+        <div class="form-inline">
+
+            <!--EVERY-->
+            <div class="form-group">
+                <label for="every">Every</label>
+                <select class="form-control" id="every" selectedIndex="{{selectedEvery}}">
+                    <option value="0">Minute</option>
+                    <option value="1">Hour</option>
+                    <option value="2">Day</option>
+                    <option value="3">Week</option>
+                    <option value="4">Month</option>
+                    <option value="5">Year</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="month">Month</label>
+                <select class="form-control" id="month" selectedIndex="{{selectedMonth}}" on-change="{{onMonthChanged}}">
+                    <option value="0">-</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="day">Day</label>
+                <select class="form-control" id="day" selectedIndex="{{selectedDay}}">
+                    <option value="0">-</option>
+                    <template repeat="{{d in days}}">
+                        <option value="{{d}}">{{d}}</option>
+                    </template>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="hour">Hour</label>
+                <select class="form-control" id="hour" selectedIndex="{{selectedHour}}">
+                    <option value="-1">-</option>
+                    <template repeat="{{h in hours}}">
+                        <option value="{{h}}">{{h}}</option>
+                    </template>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="minute">Minute</label>
+                <select class="form-control" id="minute" selectedIndex="{{selectedMinute}}">
+                    <option value="-1">-</option>
+                    <template repeat="{{m in minutes}}">
+                        <option value="{{m}}">{{m}}</option>
+                    </template>
+                </select>
+            </div>
+
+        </div>
+
+    </template>
+
+    <!--EXTERNAL JS-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <script>
+
+        var daysInEachMonth = {
+            1: 31,
+            2: 28,
+            3: 31,
+            4: 30,
+            5: 31,
+            6: 30,
+            7: 31,
+            8: 31,
+            9: 30,
+            10: 31,
+            11: 30,
+            12: 31
+        };
+
+        function generateDaysOptions(count) {
+            var days = [];
+            for (var i = 1; i <= daysInEachMonth[count]; i++) {
+                days.push(i);
+            }
+            return days;
+        }
+
+        Polymer({
+            created: function () {
+                this.days = [];
+                this.hours = function () {
+                    var hours = [];
+                    for (var i = 0; i < 24; i++) {
+                        hours.push(i);
+                    }
+                    return hours;
+                }();
+                this.minutes = function () {
+                    var minutes = [];
+                    for (var i = 0; i < 60; i++) {
+                        minutes.push(i);
+                    }
+                    return minutes;
+                }();
+                this.selectedMonth = 0;
+                this.selectedDay = 0;
+                this.selectedHour = -1;
+                this.selectedMinute = -1;
+            },
+            onMonthChanged: function (e, detail, sender) {
+                this.days = generateDaysOptions(this.selectedMonth);
+            }
+        });
+
+    </script>
+
+</polymer-element>
