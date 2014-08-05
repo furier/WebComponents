@@ -1,6 +1,6 @@
 # WebComponents
 
-Polymer Custom WebComponents
+[Polymer](http://www.polymer-project.org/) Custom WebComponents
 
 ## Installation
 
@@ -57,4 +57,3 @@ Your HTML should look like this:
         <ss-scheduler></ss-scheduler>
     </body>
     </html>
-
