@@ -18,10 +18,10 @@ Python 2.x:
 Python 3.x:
 
     python -m http.server 
-Test out the web server by loading the finished version of the project. For example:
+Test out the web server by loading the project. For example:
 
     http://localhost:8000
-URLs in this tutorial assume your local server is listening on port 8000. If you’re using a different port, substitute the port you’re using.
+The URL assume your local server is listening on port 8000. If you’re using a different port, substitute the port you’re using.
 
 Now you can just start hacking and slashing!
 
