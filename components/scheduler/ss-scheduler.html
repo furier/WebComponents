@@ -3,7 +3,7 @@
 <polymer-element name="ss-scheduler">
     <template>
 
-        <!--STYLES / CSS-->
+        <!--STYLING / CSS-->
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
         <style>
 
@@ -25,9 +25,10 @@
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" hidden?="{{hideMonth}}">
                 <label for="month">Month</label>
-                <select class="form-control" id="month" selectedIndex="{{selectedMonth}}" on-change="{{onMonthChanged}}">
+                <select class="form-control" id="month" selectedIndex="{{selectedMonth}}"
+                        on-change="{{onMonthChanged}}">
                     <option value="0">-</option>
                     <option value="1">January</option>
                     <option value="2">February</option>
@@ -44,8 +45,8 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="day">Day</label>
+            <div class="form-group" hidden?="{{hideDay}}">
+                <label for="day">on</label>
                 <select class="form-control" id="day" selectedIndex="{{selectedDay}}">
                     <option value="0">-</option>
                     <template repeat="{{d in days}}">
@@ -54,7 +55,7 @@
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" hidden?="{{hideHour}}">
                 <label for="hour">Hour</label>
                 <select class="form-control" id="hour" selectedIndex="{{selectedHour}}">
                     <option value="-1">-</option>
@@ -64,7 +65,7 @@
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" hidden?="{{hideMinute}}">
                 <label for="minute">Minute</label>
                 <select class="form-control" id="minute" selectedIndex="{{selectedMinute}}">
                     <option value="-1">-</option>
@@ -107,27 +108,76 @@
             return days;
         }
 
+        function generateRange(count) {
+            var list = [];
+            for (var i = 0; i < count; i++) {
+                list.push(i);
+            }
+            return list;
+        }
+
         Polymer({
             created: function () {
+
                 this.days = [];
-                this.hours = function () {
-                    var hours = [];
-                    for (var i = 0; i < 24; i++) {
-                        hours.push(i);
-                    }
-                    return hours;
-                }();
-                this.minutes = function () {
-                    var minutes = [];
-                    for (var i = 0; i < 60; i++) {
-                        minutes.push(i);
-                    }
-                    return minutes;
-                }();
+                this.hours = generateRange(24);
+                this.minutes = generateRange(60);
+
+                this.selectedEvery = 5;
                 this.selectedMonth = 0;
                 this.selectedDay = 0;
                 this.selectedHour = -1;
                 this.selectedMinute = -1;
+
+            },
+            observe: {
+                selectedEvery: function (o,n) {
+                    switch (n)
+                    {
+                        case 0:
+                            this.hideMinute = true;
+                            this.hideHour = true;
+                            this.hideDay = true;
+                            this.hideWeek = true;
+                            this.hideMonth = true;
+                            break;
+                        case 1:
+                            this.hideMinute = false;
+                            this.hideHour = true;
+                            this.hideDay = true;
+                            this.hideWeek = true;
+                            this.hideMonth = true;
+                            break;
+                        case 2:
+                            this.hideMinute = false;
+                            this.hideHour = false;
+                            this.hideDay = true;
+                            this.hideWeek = true;
+                            this.hideMonth = true;
+                            break;
+                        case 3:
+                            this.hideMinute = false;
+                            this.hideHour = false;
+                            this.hideDay = false;
+                            this.hideWeek = true;
+                            this.hideMonth = true;
+                            break;
+                        case 4:
+                            this.hideMinute = false;
+                            this.hideHour = false;
+                            this.hideDay = false;
+                            this.hideWeek = false;
+                            this.hideMonth = true;
+                            break;
+                        case 5:
+                            this.hideMinute = false;
+                            this.hideHour = false;
+                            this.hideDay = false;
+                            this.hideWeek = false;
+                            this.hideMonth = false;
+                            break;
+                    }
+                }
             },
             onMonthChanged: function (e, detail, sender) {
                 this.days = generateDaysOptions(this.selectedMonth);
