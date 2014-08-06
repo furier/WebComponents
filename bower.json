@@ -1,6 +1,7 @@
 {
   "name": "WebComponents",
-  "version": "0.0.0",
+  "version": "1.0.0.0",
+  "description": "[Polymer](http://www.polymer-project.org/) Custom WebComponents",
   "authors": [
     "Sander Struijk <sander.struijk@gmail.com>"
   ],

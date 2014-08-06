@@ -18,7 +18,7 @@ gulp.task('watch', ['connect'], function () {
     gulp.watch(['index.html', 'components/**'], function () {
         gulp.src(['index.html', 'components/**'])
             .pipe(connect.reload());
-    })
+    });
 });
 
 gulp.task('default', ['watch']);
