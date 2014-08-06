@@ -71,6 +71,7 @@ Your HTML should look like this:
         <script src="WebComponents/bower_components/platform/platform.js"></script>
     
         <!--WEB COMPONENT IMPORTS-->
+        <link rel="import" href="WebComponents/bower_components/polymer/polymer.html">
         <link rel="import" href="WebComponents/components/scheduler/ss-scheduler.html">
     </head>
     <body unresolved>
