@@ -25,6 +25,14 @@ The URL assume your local server is listening on port 8000. If you’re using a 
 
 Now you can just start hacking and slashing!
 
+### Livereload
+
+    npm install
+    gulp
+    
+NPM will install gulp and gulp-connect to serve as a simple static web server with live reload.
+NOTE: python SimpleHTTPServer is not needed with this approach.
+
 ## Usage
 
 Assuming your directory structure looks like this:

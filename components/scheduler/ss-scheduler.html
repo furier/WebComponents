@@ -1,6 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html"/>
 
-<polymer-element name="ss-scheduler">
+<polymer-element name="ss-scheduler" attributes="cronValue">
     <template>
 
         <!--STYLING / CSS-->
@@ -15,7 +15,7 @@
             <!--EVERY-->
             <div class="form-group">
                 <label for="every">Every</label>
-                <select class="form-control" id="every" selectedIndex="{{selectedEvery}}">
+                <select class="form-control" id="every" selectedIndex="{{selectedEvery}}" on-change="{{onChange}}">
                     <option value="0">Minute</option>
                     <option value="1">Hour</option>
                     <option value="2">Day</option>
@@ -26,34 +26,62 @@
             </div>
 
             <div class="form-group" id="month-and-day" hidden?="{{hideMonthAndDay}}">
-                <select class="form-control" id="month" selectedIndex="{{selectedMonth}}" on-change="{{onMonthChanged}}">
-                    <option value="1">January</option>
-                    <option value="2">February</option>
-                    <option value="3">March</option>
-                    <option value="4">April</option>
-                    <option value="5">May</option>
-                    <option value="6">June</option>
-                    <option value="7">July</option>
-                    <option value="8">August</option>
-                    <option value="9">September</option>
-                    <option value="10">October</option>
-                    <option value="11">November</option>
-                    <option value="12">December</option>
+                <select class="form-control" selectedIndex="{{selectedMonth}}" on-change="{{onMonthChanged}}">
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
                 </select>
-                <select class="form-control" id="day" selectedIndex="{{selectedDay}}">
+                <select class="form-control" selectedIndex="{{selectedDay}}" on-change="{{onChange}}">
                     <template repeat="{{d in days}}">
                         <option value="{{d}}">{{d}}</option>
                     </template>
                 </select>
             </div>
 
-            <div class="form-group" hidden?="{{hideHourAndMinute}}">
-                <select class="form-control" id="hour" selectedIndex="{{selectedHour}}">
+            <div class="form-group" id="day" hidden?="{{hideDay}}">
+                <select class="form-control" selectedIndex="{{selectedDay}}" on-change="{{onChange}}">
+                    <template repeat="{{d in days}}">
+                        <option value="{{d}}">{{d}}</option>
+                    </template>
+                </select>
+            </div>
+
+            <div class="form-group" id="weekDay" hidden?="{{hideWeekDay}}">
+                <select class="form-control" selectedIndex="{{selectedWeekDay}}" on-change="{{onChange}}">
+                    <option value="0">Monday</option>
+                    <option value="1">Tuesday</option>
+                    <option value="2">Wednesday</option>
+                    <option value="3">Thursday</option>
+                    <option value="4">Friday</option>
+                    <option value="5">Saturday</option>
+                    <option value="6">Sunday</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="hour-and-minute" hidden?="{{hideHourAndMinute}}">
+                <select class="form-control" selectedIndex="{{selectedHour}}" on-change="{{onChange}}">
                     <template repeat="{{h in hours}}">
                         <option value="{{h}}">{{h}}</option>
                     </template>
                 </select>
-                <select class="form-control" id="minute" selectedIndex="{{selectedMinute}}">
+                <select class="form-control" selectedIndex="{{selectedMinute}}" on-change="{{onChange}}">
+                    <template repeat="{{m in minutes}}">
+                        <option value="{{m}}">{{m}}</option>
+                    </template>
+                </select>
+            </div>
+
+            <div class="form-group" id="minute" hidden?="{{hideMinute}}">
+                <select class="form-control" selectedIndex="{{selectedMinute}}" on-change="{{onChange}}">
                     <template repeat="{{m in minutes}}">
                         <option value="{{m}}">{{m}}</option>
                     </template>
@@ -65,10 +93,17 @@
     </template>
 
     <!--EXTERNAL JS-->
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <!--<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>-->
+    <!--<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>-->
 
     <script>
+
+        var MINUTE = 0,
+            HOUR = 1,
+            DAY = 2,
+            WEEK = 3,
+            MONTH = 4,
+            YEAR = 5;
 
         var daysInEachMonth = {
             1: 31,
@@ -101,6 +136,23 @@
             return list;
         }
 
+        function generateCronValues(option, minute, hour, day, month, dayOfWeek) {
+            switch (option) {
+                case MINUTE:
+                    return '* * * * *';
+                case HOUR:
+                    return minute + ' * * * *';
+                case DAY:
+                    return minute + ' ' + hour + ' * * *';
+                case WEEK:
+                    return minute + ' ' + hour + ' * * ' + dayOfWeek;
+                case MONTH:
+                    return minute + ' ' + hour + ' ' + day + ' * *';
+                case YEAR:
+                    return minute + ' ' + hour + ' ' + day + ' ' + month + ' *';
+            }
+        }
+
         Polymer({
             created: function () {
 
@@ -108,52 +160,60 @@
                 this.hours = generateRange(24);
                 this.minutes = generateRange(60);
 
-                this.selectedEvery = 5;
                 this.selectedMonth = 0;
+                this.selectedWeekDay = 0;
                 this.selectedDay = 0;
                 this.selectedHour = 0;
                 this.selectedMinute = 0;
 
             },
+            ready: function () {
+
+                this.selectedEvery = 5;
+                this.cronValue = this.cronValue || '* * * * *';
+                console.log(this.cronValue);
+
+            },
             observe: {
                 selectedEvery: function (o,n) {
+                    this.hideMinute = true;
+                    this.hideHourAndMinute = true;
+                    this.hideDay = true;
+                    this.hideMonthAndDay = true;
+                    this.hideWeekDay = true;
                     switch (n)
                     {
-                        case 0:
-                            this.hideHourAndMinute = true;
-                            this.hideMonthAndDay = true;
-                            this.hideWeek = true;
+                        case MINUTE:
                             break;
-                        case 1:
-                            this.hideHourAndMinute = true;
-                            this.hideMonthAndDay = true;
-                            this.hideWeek = true;
+                        case HOUR:
+                            this.hideMinute = false;
                             break;
-                        case 2:
+                        case DAY:
                             this.hideHourAndMinute = false;
-                            this.hideMonthAndDay = true;
-                            this.hideWeek = true;
                             break;
-                        case 3:
+                        case WEEK:
                             this.hideHourAndMinute = false;
-                            this.hideMonthAndDay = false;
-                            this.hideWeek = true;
+                            this.hideWeekDay = false;
                             break;
-                        case 4:
+                        case MONTH:
+                            this.hideHourAndMinute = false;
+                            this.hideDay = false;
+                            break;
+                        case YEAR:
                             this.hideHourAndMinute = false;
                             this.hideMonthAndDay = false;
-                            this.hideWeek = false;
-                            break;
-                        case 5:
-                            this.hideHourAndMinute = false;
-                            this.hideMonthAndDay = false;
-                            this.hideWeek = false;
                             break;
                     }
                 }
             },
             onMonthChanged: function (e, detail, sender) {
                 this.days = generateDaysOptions(this.selectedMonth+1);
+                this.onChange();
+            },
+            onChange: function (e, detail, sender) {
+                //On change calculate cron schedule
+                this.cronValue = generateCronValues(this.selectedEvery, this.selectedMinute, this.selectedHour, this.selectedDay, this.selectedMonth, this.selectedWeekDay);
+                console.log(this.cronValue);
             }
         });
 
