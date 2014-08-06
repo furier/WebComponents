@@ -12,7 +12,7 @@
         <!--SEMANTICS-->
         <div class="form-inline">
 
-            <!--EVERY-->
+            <!--EVERY OPTIONS-->
             <div class="form-group">
                 <label for="every">Every</label>
                 <select class="form-control" id="every" selectedIndex="{{selectedEvery}}" on-change="{{onChange}}">
@@ -25,6 +25,7 @@
                 </select>
             </div>
 
+            <!--MONTH AND DAY-->
             <div class="form-group" id="month-and-day" hidden?="{{hideMonthAndDay}}">
                 <select class="form-control" selectedIndex="{{selectedMonth}}" on-change="{{onMonthChanged}}">
                     <option value="0">January</option>
@@ -47,6 +48,7 @@
                 </select>
             </div>
 
+            <!--DAY-->
             <div class="form-group" id="day" hidden?="{{hideDay}}">
                 <select class="form-control" selectedIndex="{{selectedDay}}" on-change="{{onChange}}">
                     <template repeat="{{d in days}}">
@@ -55,6 +57,7 @@
                 </select>
             </div>
 
+            <!--WEEK DAY-->
             <div class="form-group" id="weekDay" hidden?="{{hideWeekDay}}">
                 <select class="form-control" selectedIndex="{{selectedWeekDay}}" on-change="{{onChange}}">
                     <option value="0">Monday</option>
@@ -67,6 +70,7 @@
                 </select>
             </div>
 
+            <!--HOUR AND MINUTE-->
             <div class="form-group" id="hour-and-minute" hidden?="{{hideHourAndMinute}}">
                 <select class="form-control" selectedIndex="{{selectedHour}}" on-change="{{onChange}}">
                     <template repeat="{{h in hours}}">
@@ -80,6 +84,7 @@
                 </select>
             </div>
 
+            <!--MINUTE-->
             <div class="form-group" id="minute" hidden?="{{hideMinute}}">
                 <select class="form-control" selectedIndex="{{selectedMinute}}" on-change="{{onChange}}">
                     <template repeat="{{m in minutes}}">
@@ -92,10 +97,10 @@
 
     </template>
 
-    <!--EXTERNAL JS-->
-    <!--<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>-->
-    <!--<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>-->
+    <!--EXTERNAL JS SCRIPTS-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.compat.min.js"></script>
 
+    <!--CUSTOM JS SCRIPT-->
     <script>
 
         var MINUTE = 0,
@@ -153,6 +158,14 @@
             }
         }
 
+        function all(list, matchValue) {
+            list.forEach(function (item) {
+                if (item !== matchValue)
+                    return false;
+            });
+            return true;
+        }
+
         Polymer({
             created: function () {
 
@@ -169,8 +182,35 @@
             },
             ready: function () {
 
-                this.selectedEvery = 5;
-                this.cronValue = this.cronValue || '* * * * *';
+                if (this.cronValue) {
+                    var v = this.cronValue.split(' ');
+                    if (v.length === 5) {
+
+                        if (v[4] !== '*')
+                            this.selectedEvery = 3;
+                        else if (v[3] !== '*')
+                            this.selectedEvery = 5;
+                        else if (v[2] !== '*')
+                            this.selectedEvery = 4;
+                        else if (v[1] !== '*')
+                            this.selectedEvery = 2;
+                        else if (v[0] !== '*')
+                            this.selectedEvery = 1;
+                        else
+                            this.selectedEvery = 0;
+
+                        this.selectedMinute = v[0] !== '*' ? v[0] : 0;
+                        this.selectedHour = v[1] !== '*' ? v[1] : 0;
+                        this.selectedDay = v[2] !== '*' ? v[2] : 0;
+                        this.selectedMonth = v[3] !== '*' ? v[3] : 0;
+                        this.selectedWeekDay = v[4] !== '*' ? v[4] : 0;
+
+                    } else
+                        throw new Error('cronValue was not provided in the correct format, correct format is: "* * * * *".');
+                } else {
+                    this.selectedEvery = 0;
+                    this.cronValue = '* * * * *';
+                }
                 console.log(this.cronValue);
 
             },
