@@ -4,11 +4,23 @@
 
 ## Installation
 
+### Bower
+
+If you want to use the WebComponents in your project, they can be added with bower.
+
+    bower install WebComponents
+
+### Git
+
+If you want to develop more components or edit existing once, clone the git repo.
+
     git clone https://github.com/furier/WebComponents
     cd WebComponents
     bower install
     
 ## Develop
+
+### Simple
 
 While you’re working, you’ll need a basic HTTP server to serve your pages. If you have Python installed, you can run one of the following commands in the top level of the starter project.
 
@@ -31,7 +43,7 @@ Now you can just start hacking and slashing!
     gulp
     
 NPM will install gulp and gulp-connect to serve as a simple static web server with live reload.
-NOTE: python SimpleHTTPServer is not needed with this approach.
+**NOTE:** python SimpleHTTPServer is not needed with this approach.
 
 ## Usage
 
