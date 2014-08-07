@@ -157,6 +157,34 @@
             }
         }
 
+        function parseCronValue() {
+            var v = this.cronValue.split(' ');
+            if (v.length === 5) {
+
+                if (v[4] !== '*')
+                    this.selectedEvery = 3;
+                else if (v[3] !== '*')
+                    this.selectedEvery = 5;
+                else if (v[2] !== '*')
+                    this.selectedEvery = 4;
+                else if (v[1] !== '*')
+                    this.selectedEvery = 2;
+                else if (v[0] !== '*')
+                    this.selectedEvery = 1;
+                else
+                    this.selectedEvery = 0;
+
+                this.selectedMinute = v[0] !== '*' ? v[0] : 0;
+                this.selectedHour = v[1] !== '*' ? v[1] : 0;
+                this.selectedDay = v[2] !== '*' ? v[2] : 0;
+                this.selectedMonth = v[3] !== '*' ? v[3] : 0;
+                this.selectedWeekDay = v[4] !== '*' ? v[4] : 0;
+
+            } else
+                throw new Error('cronValue was not provided in the correct format: ' + this.cronValue + ', correct format is: "* * * * *".\n' +
+                        'Take a look @ http://en.wikipedia.org/wiki/Cron for more information.');
+        }
+
         Polymer({
             created: function () {
 
@@ -174,31 +202,7 @@
             ready: function () {
 
                 if (this.cronValue) {
-                    var v = this.cronValue.split(' ');
-                    if (v.length === 5) {
-
-                        if (v[4] !== '*')
-                            this.selectedEvery = 3;
-                        else if (v[3] !== '*')
-                            this.selectedEvery = 5;
-                        else if (v[2] !== '*')
-                            this.selectedEvery = 4;
-                        else if (v[1] !== '*')
-                            this.selectedEvery = 2;
-                        else if (v[0] !== '*')
-                            this.selectedEvery = 1;
-                        else
-                            this.selectedEvery = 0;
-
-                        this.selectedMinute = v[0] !== '*' ? v[0] : 0;
-                        this.selectedHour = v[1] !== '*' ? v[1] : 0;
-                        this.selectedDay = v[2] !== '*' ? v[2] : 0;
-                        this.selectedMonth = v[3] !== '*' ? v[3] : 0;
-                        this.selectedWeekDay = v[4] !== '*' ? v[4] : 0;
-
-                    } else
-                        throw new Error('cronValue was not provided in the correct format: ' + this.cronValue + ', correct format is: "* * * * *".\n' +
-                                        'Take a look @ http://en.wikipedia.org/wiki/Cron for more information.');
+                    parseCronValue.call(this);
                 } else {
                     this.selectedEvery = 0;
                     this.cronValue = '* * * * *';
@@ -245,6 +249,10 @@
             onChange: function (e, detail, sender) {
                 //On change calculate cron schedule.
                 this.cronValue = generateCronValues(this.selectedEvery, this.selectedMinute, this.selectedHour, this.selectedDay, this.selectedMonth, this.selectedWeekDay);
+            },
+            cronValueChanged: function () {
+                if (this.cronValue)
+                    parseCronValue.call(this);
             }
         });
 
