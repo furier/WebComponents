@@ -1,6 +1,6 @@
 
 
-<polymer-element name="ss-scheduler" attributes="cronValue">
+<polymer-element name="ss-scheduler">
     <template>
 
         <!--STYLING / CSS-->
@@ -186,6 +186,12 @@
         }
 
         Polymer({
+            publish: {
+                cronValue: {
+                  value: '* * * * *'
+                  reflect: true
+                }
+            },
             created: function () {
 
                 this.days = generateDaysOptions(1);
@@ -205,7 +211,6 @@
                     parseCronValue.call(this);
                 } else {
                     this.selectedEvery = 0;
-                    this.cronValue = '* * * * *';
                 }
 
             },
