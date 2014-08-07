@@ -157,14 +157,6 @@
             }
         }
 
-        function all(list, matchValue) {
-            list.forEach(function (item) {
-                if (item !== matchValue)
-                    return false;
-            });
-            return true;
-        }
-
         Polymer({
             created: function () {
 
@@ -205,12 +197,12 @@
                         this.selectedWeekDay = v[4] !== '*' ? v[4] : 0;
 
                     } else
-                        throw new Error('cronValue was not provided in the correct format, correct format is: "* * * * *".');
+                        throw new Error('cronValue was not provided in the correct format: ' + this.cronValue + ', correct format is: "* * * * *".\n' +
+                                        'Take a look @ http://en.wikipedia.org/wiki/Cron for more information.');
                 } else {
                     this.selectedEvery = 0;
                     this.cronValue = '* * * * *';
                 }
-                console.log(this.cronValue);
 
             },
             observe: {
@@ -246,13 +238,13 @@
                 }
             },
             onMonthChanged: function (e, detail, sender) {
+                //On month changed refill days array with correct amount of days.
                 this.days = generateDaysOptions(this.selectedMonth+1);
                 this.onChange();
             },
             onChange: function (e, detail, sender) {
-                //On change calculate cron schedule
+                //On change calculate cron schedule.
                 this.cronValue = generateCronValues(this.selectedEvery, this.selectedMinute, this.selectedHour, this.selectedDay, this.selectedMonth, this.selectedWeekDay);
-                console.log(this.cronValue);
             }
         });
 
