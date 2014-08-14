@@ -1,0 +1,23 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html"/>
+<link rel="import" href="ss-list.html"/>
+
+<polymer-element name="ss-list-group" attributes="items">
+    <template>
+
+        <!--STYLING / CSS-->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+        <!--SEMANTICS-->
+        <ss-list>
+            <template repeat="{{item in items}}">
+                <li class="list-group-item {{item.type}}">{{item.text}}</li>
+            </template>
+        </ss-list>
+
+    </template>
+    <script>
+        (function () {
+            Polymer({});
+        }());
+    </script>
+</polymer-element>

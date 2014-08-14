@@ -1,0 +1,27 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html"/>
+<link rel="import" href="../listgroup/ss-list.html"/>
+
+<polymer-element name="ss-typeahead" attributes="items placeholder text">
+    <template>
+
+        <!--STYLING / CSS-->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+        <!--SEMANTICS-->
+        <input id="input" type="text" class="form-control"
+               placeholder="{{placeholder}}" value="{{text}}">
+        <ss-list-group items="{{items}}"></ss-list-group>
+
+    </template>
+    <script>
+        (function () {
+            Polymer({
+                ready: function () {
+                    this.$.input.addEventListener('focus', function () {
+                        console.log('I got focused!');
+                    });
+                }
+            });
+        }());
+    </script>
+</polymer-element>

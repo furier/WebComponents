@@ -7,11 +7,119 @@
     <!--PLATFORM JS - FOR CROSS BROWSER WEB COMPONENT SUPPORT-->
     <script src="bower_components/platform/platform.js"></script>
 
+    <!--STYLING / CSS-->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="docs.min.css">
+    <style>
+        html, body {
+            height: 100%;
+        }
+        .wc-header, .wc-footer {
+            color: #ffffff;
+            background: #383f47;
+            width: 1920px;
+        }
+        .wc-component {
+            width: 1920px;
+        }
+        .wc-component:nth-child(even) {
+            background: #ffffff;
+        }
+        .wc-component:nth-child(odd) {
+            background: #ecf0f1;
+        }
+    </style>
+
     <!--WEB COMPONENT IMPORTS-->
-    <link rel="import" href="bower_components/polymer/polymer.html"/>
     <link rel="import" href="components/scheduler/ss-scheduler.html">
+    <link rel="import" href="components/typeahead/ss-typeahead.html">
 </head>
-<body unresolved>
-    <ss-scheduler></ss-scheduler>
+<body unresolved ng-app="WebComponents">
+
+
+    <div class="container wc-header">
+        <div class="container">
+            <h1>WebComponents</h1>
+        </div>
+    </div>
+
+
+    <div class="wc-component">
+        <div class="container">
+            <div ng-controller="schedulerCtrl">
+                <h2>Scheduler</h2>
+                <p>With the scheduler component, scheduling cron jobs is a breeze!</p>
+                <div class="bs-example">
+                    <ss-scheduler cronvalue="{{time}}" bind-polymer></ss-scheduler>
+                </div>
+                <div class="highlight">
+                    <code class="html">
+                    <pre>
+                        &lt;ss-scheduler cronvalue=&quot;{{time}}&quot;&gt;&lt;/ss-scheduler&gt;
+                    </pre>
+                    </code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="wc-component">
+        <div class="container">
+            <div ng-controller="typeaheadCtrl">
+                <h2>Typeahead</h2>
+                <p>lorum ipsum text!</p>
+                <div class="bs-example">
+                    <ss-typeahead placeholder="Typeahead" text="{{text}}" items="{{items}}" bind-polymer></ss-typeahead>
+                </div>
+                <div class="highlight">
+                    <code class="html">
+                    <pre>
+                        &lt;ss-typeahead placeholder=&quot;...&quot; text=&quot;...&quot; items=&quot;...&quot;&gt;&lt;/ss-typeahead&gt;
+                    </pre>
+                    </code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular.min.js"></script>
+    <script src="bower_components/angular-bind-polymer/angular_bind_polymer.js"></script>
+
+    <script>
+
+        angular.module('WebComponents', ['eee-c.angularBindPolymer'])
+                .controller('schedulerCtrl', function ($scope) {
+
+                    $scope.time = '0 0 0 0 *';
+
+                })
+                .controller('typeaheadCtrl', function ($scope) {
+
+                    $scope.text = '';
+                    $scope.items = [
+                        {
+                            type: 'list-group-item-success',
+                            text: 'success'
+                        },
+                        {
+                            type: 'list-group-item-info',
+                            text: 'info'
+                        },
+                        {
+                            type: 'list-group-item-warning',
+                            text: 'warning'
+                        },
+                        {
+                            type: 'list-group-item-danger',
+                            text: 'danger'
+                        }
+                    ];
+
+                });
+
+    </script>
 </body>
 </html>

@@ -17,6 +17,7 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#~0.3.4"
+    "polymer": "Polymer/polymer#~0.3.4",
+    "angular-bind-polymer": "~0.0.1"
   }
 }
