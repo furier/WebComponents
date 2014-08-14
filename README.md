@@ -2,6 +2,8 @@
 
 [Polymer](http://www.polymer-project.org/) Custom WebComponents
 
+[DEMO](http://furier.github.io/WebComponents/)
+
 ## Installation
 
 ### Bower
