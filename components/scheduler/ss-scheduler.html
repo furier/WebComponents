@@ -1,0 +1,268 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html"/>
+
+<polymer-element name="ss-scheduler">
+    <template>
+
+        <!--STYLING / CSS-->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <style>
+
+        </style>
+
+        <!--SEMANTICS-->
+        <div class="form-inline">
+
+            <!--EVERY OPTIONS-->
+            <div class="form-group">
+                <label for="every">Every</label>
+                <select class="form-control" id="every" selectedIndex="{{selectedEvery}}" on-change="{{onChange}}">
+                    <option value="0">Minute</option>
+                    <option value="1">Hour</option>
+                    <option value="2">Day</option>
+                    <option value="3">Week</option>
+                    <option value="4">Month</option>
+                    <option value="5">Year</option>
+                </select>
+            </div>
+
+            <!--MONTH AND DAY-->
+            <div class="form-group" id="month-and-day" hidden?="{{hideMonthAndDay}}">
+                <select class="form-control" selectedIndex="{{selectedMonth}}" on-change="{{onMonthChanged}}">
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                </select>
+                <select class="form-control" selectedIndex="{{selectedDay}}" on-change="{{onChange}}">
+                    <template repeat="{{d in days}}">
+                        <option value="{{d}}">{{d}}</option>
+                    </template>
+                </select>
+            </div>
+
+            <!--DAY-->
+            <div class="form-group" id="day" hidden?="{{hideDay}}">
+                <select class="form-control" selectedIndex="{{selectedDay}}" on-change="{{onChange}}">
+                    <template repeat="{{d in days}}">
+                        <option value="{{d}}">{{d}}</option>
+                    </template>
+                </select>
+            </div>
+
+            <!--WEEK DAY-->
+            <div class="form-group" id="weekDay" hidden?="{{hideWeekDay}}">
+                <select class="form-control" selectedIndex="{{selectedWeekDay}}" on-change="{{onChange}}">
+                    <option value="0">Monday</option>
+                    <option value="1">Tuesday</option>
+                    <option value="2">Wednesday</option>
+                    <option value="3">Thursday</option>
+                    <option value="4">Friday</option>
+                    <option value="5">Saturday</option>
+                    <option value="6">Sunday</option>
+                </select>
+            </div>
+
+            <!--HOUR AND MINUTE-->
+            <div class="form-group" id="hour-and-minute" hidden?="{{hideHourAndMinute}}">
+                <select class="form-control" selectedIndex="{{selectedHour}}" on-change="{{onChange}}">
+                    <template repeat="{{h in hours}}">
+                        <option value="{{h}}">{{h}}</option>
+                    </template>
+                </select>
+                <select class="form-control" selectedIndex="{{selectedMinute}}" on-change="{{onChange}}">
+                    <template repeat="{{m in minutes}}">
+                        <option value="{{m}}">{{m}}</option>
+                    </template>
+                </select>
+            </div>
+
+            <!--MINUTE-->
+            <div class="form-group" id="minute" hidden?="{{hideMinute}}">
+                <select class="form-control" selectedIndex="{{selectedMinute}}" on-change="{{onChange}}">
+                    <template repeat="{{m in minutes}}">
+                        <option value="{{m}}">{{m}}</option>
+                    </template>
+                </select>
+            </div>
+
+        </div>
+
+    </template>
+
+    <!--EXTERNAL JS SCRIPTS-->
+
+    <!--CUSTOM JS SCRIPT-->
+    <script>
+
+        (function () {
+            var MINUTE = 0,
+                    HOUR = 1,
+                    DAY = 2,
+                    WEEK = 3,
+                    MONTH = 4,
+                    YEAR = 5;
+
+            var daysInEachMonth = {
+                1: 31,
+                2: 28,
+                3: 31,
+                4: 30,
+                5: 31,
+                6: 30,
+                7: 31,
+                8: 31,
+                9: 30,
+                10: 31,
+                11: 30,
+                12: 31
+            };
+
+            function generateDaysOptions(count) {
+                var days = [];
+                for (var i = 1; i <= daysInEachMonth[count]; i++) {
+                    days.push(i);
+                }
+                return days;
+            }
+
+            function generateRange(count) {
+                var list = [];
+                for (var i = 0; i < count; i++) {
+                    list.push(i);
+                }
+                return list;
+            }
+
+            function generateCronValues(option, minute, hour, day, month, dayOfWeek) {
+                switch (option) {
+                    case MINUTE:
+                        return '* * * * *';
+                    case HOUR:
+                        return minute + ' * * * *';
+                    case DAY:
+                        return minute + ' ' + hour + ' * * *';
+                    case WEEK:
+                        return minute + ' ' + hour + ' * * ' + dayOfWeek;
+                    case MONTH:
+                        return minute + ' ' + hour + ' ' + day + ' * *';
+                    case YEAR:
+                        return minute + ' ' + hour + ' ' + day + ' ' + month + ' *';
+                }
+            }
+
+            function parseCronValue() {
+                var v = this.cronvalue.split(' ');
+                if (v.length === 5) {
+
+                    if (v[4] !== '*')
+                        this.selectedEvery = 3;
+                    else if (v[3] !== '*')
+                        this.selectedEvery = 5;
+                    else if (v[2] !== '*')
+                        this.selectedEvery = 4;
+                    else if (v[1] !== '*')
+                        this.selectedEvery = 2;
+                    else if (v[0] !== '*')
+                        this.selectedEvery = 1;
+                    else
+                        this.selectedEvery = 0;
+
+                    this.selectedMinute = v[0] !== '*' ? v[0] : 0;
+                    this.selectedHour = v[1] !== '*' ? v[1] : 0;
+                    this.selectedDay = v[2] !== '*' ? v[2] : 0;
+                    this.selectedMonth = v[3] !== '*' ? v[3] : 0;
+                    this.selectedWeekDay = v[4] !== '*' ? v[4] : 0;
+
+                } else
+                    throw new Error('cronValue was not provided in the correct format: ' + this.cronvalue + ', correct format is: "* * * * *".\n' +
+                            'Take a look @ http://en.wikipedia.org/wiki/Cron for more information.');
+            }
+
+            Polymer({
+                publish: {
+                    cronvalue: {
+                        value: '* * * * *',
+                        reflect: true
+                    }
+                },
+                created: function () {
+
+                    this.days = generateDaysOptions(1);
+                    this.hours = generateRange(24);
+                    this.minutes = generateRange(60);
+
+                    this.selectedMonth = 0;
+                    this.selectedWeekDay = 0;
+                    this.selectedDay = 0;
+                    this.selectedHour = 0;
+                    this.selectedMinute = 0;
+
+                },
+                ready: function () {
+
+                    if (this.cronvalue) {
+                        parseCronValue.call(this);
+                    } else {
+                        this.selectedEvery = 0;
+                    }
+
+                },
+                observe: {
+                    selectedEvery: function (o,n) {
+                        this.hideMinute = true;
+                        this.hideHourAndMinute = true;
+                        this.hideDay = true;
+                        this.hideMonthAndDay = true;
+                        this.hideWeekDay = true;
+                        switch (n)
+                        {
+                            case MINUTE:
+                                break;
+                            case HOUR:
+                                this.hideMinute = false;
+                                break;
+                            case DAY:
+                                this.hideHourAndMinute = false;
+                                break;
+                            case WEEK:
+                                this.hideHourAndMinute = false;
+                                this.hideWeekDay = false;
+                                break;
+                            case MONTH:
+                                this.hideHourAndMinute = false;
+                                this.hideDay = false;
+                                break;
+                            case YEAR:
+                                this.hideHourAndMinute = false;
+                                this.hideMonthAndDay = false;
+                                break;
+                        }
+                    }
+                },
+                onMonthChanged: function (e, detail, sender) {
+                    //On month changed refill days array with correct amount of days.
+                    this.days = generateDaysOptions(this.selectedMonth+1);
+                    this.onChange();
+                },
+                onChange: function (e, detail, sender) {
+                    //On change calculate cron schedule.
+                    this.cronvalue = generateCronValues(this.selectedEvery, this.selectedMinute, this.selectedHour, this.selectedDay, this.selectedMonth, this.selectedWeekDay);
+                },
+                cronvalueChanged: function () {
+                    if (this.cronvalue)
+                        parseCronValue.call(this);
+                }
+            });
+        }());
+
+    </script>
+
+</polymer-element>
