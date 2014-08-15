@@ -1,27 +1,99 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html"/>
-<link rel="import" href="../listgroup/ss-list.html"/>
+<link rel="import" href="../listgroup/ss-list-group.html"/>
 
-<polymer-element name="ss-typeahead" attributes="items placeholder text">
+<polymer-element name="ss-typeahead" attributes="items placeholder jump-to-last-occurrence-of">
     <template>
 
         <!--STYLING / CSS-->
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 
         <!--SEMANTICS-->
-        <input id="input" type="text" class="form-control"
+        <input id="inputField" type="text" class="form-control"
                placeholder="{{placeholder}}" value="{{text}}">
-        <ss-list-group items="{{items}}"></ss-list-group>
+        <ss-list-group id="listgroup" items="{{items | filterItems(text)}}" hidden?="{{hideSuggestions}}"></ss-list-group>
 
     </template>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
     <script>
-        (function () {
+        (function ($) {
+
+            function _strRightBack(str, exp){
+                var index = str.lastIndexOf(exp);
+                str = index > -1 ? str.slice(index + 1, str.length) : str;
+                return str;
+            }
+
+            $.fn.textWidth = function () {
+                $body = $('body');
+                $this = $(this);
+                $text = $this.text();
+                if ($text == '') $text = $this.val();
+                var calc = '<div style="clear:both;display:block;visibility:hidden;"><span style="width;inherit;margin:0;font-family:' + $this.css('font-family') + ';font-size:' + $this.css('font-size') + ';font-weight:' + $this.css('font-weight') + '">' + $text + '</span></div>';
+                $body.append(calc);
+                var width = $('body').find('span:last').width();
+                $body.find('span:last').parent().remove();
+                return width;
+            };
+
             Polymer({
+                publish: {
+                    text: {
+                        value: '',
+                        reflect: true
+                    }
+                },
+                created: function () {
+                    this.hideSuggestions = true;
+                    this['jump-to-last-occurrence-of'] = this['jump-to-last-occurrence-of'] || '';
+                },
                 ready: function () {
-                    this.$.input.addEventListener('focus', function () {
-                        console.log('I got focused!');
+                    var self = this;
+                    var input = self.$.inputField;
+                    var listGroup = self.$.listgroup;
+
+                    listGroup.style.position = 'absolute';
+                    listGroup.style.zIndex = 99999;
+
+                    self.items = typeof self.items === 'string' ? JSON.parse(self.items) : self.items || [];
+
+                    input.addEventListener('focus', function () {
+                        self.hideSuggestions = false;
                     });
+                    input.addEventListener('blur', function () {
+                        self.hideSuggestions = true;
+                    });
+                },
+                textChanged: function (oldVal, newVal) {
+                    if (newVal === oldVal) return;
+
+                    var self = this;
+                    var char = self['jump-to-last-occurrence-of'];
+                    var listGroup = self.$.listgroup;
+                    var lastIndex = newVal.lastIndexOf(char);
+
+                    if (newVal && char && lastIndex > 0) {
+
+                        newVal = newVal.slice(0, lastIndex);
+                        var input = $(self.$.inputField);
+                        input.text(newVal);
+                        var textWidth = input.textWidth();
+
+                        listGroup.style.left = textWidth + 15 + 'px';
+                    } else {
+                        listGroup.style.left = 15 + 'px';
+                    }
+                },
+                filterItems: function (values, text) {
+                    var char = this['jump-to-last-occurrence-of'];
+                    text = char ? _strRightBack(text, char) : text;
+                    var matches = _.filter(values, function (value) {
+                        return _.contains(value.text, text);
+                    });
+                    return this.text ? matches : values;
                 }
             });
-        }());
+
+        }(jQuery));
     </script>
 </polymer-element>

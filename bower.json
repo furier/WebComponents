@@ -19,6 +19,7 @@
   "dependencies": {
     "polymer": "Polymer/polymer#~0.3.4",
     "angular-bind-polymer": "~0.0.1",
-    "github-card": "pazguille/github-card"
+    "github-card": "pazguille/github-card",
+    "github-fork-ribbon-css": "~0.1.1"
   }
 }
