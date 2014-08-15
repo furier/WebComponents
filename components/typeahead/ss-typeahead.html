@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html"/>
+<link rel="import" href="../../bower_components/polymer-keydown/polymer-keydown.html"/>
 <link rel="import" href="../listgroup/ss-list-group.html"/>
 
 <polymer-element name="ss-typeahead" attributes="items placeholder jump-to-last-occurrence-of">
@@ -6,11 +7,24 @@
 
         <!--STYLING / CSS-->
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <style>
+            ss-list-group {
+                position: absolute;
+                z-index: 99999;
+            }
+        </style>
 
         <!--SEMANTICS-->
         <input id="inputField" type="text" class="form-control"
                placeholder="{{placeholder}}" value="{{text}}">
         <ss-list-group id="listgroup" items="{{items | filterItems(text)}}" hidden?="{{hideSuggestions}}"></ss-list-group>
+
+        <!--TAB-->
+        <polymer-keydown code="9" on-keydown="{{autoComplete}}"></polymer-keydown>
+        <!--ARROW DOWN-->
+        <polymer-keydown code="40" on-keydown="{{nextSuggestion}}"></polymer-keydown>
+        <!--ARROW UP-->
+        <polymer-keydown code="38" on-keydown="{{previousSuggestion}}"></polymer-keydown>
 
     </template>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -22,6 +36,36 @@
                 var index = str.lastIndexOf(exp);
                 str = index > -1 ? str.slice(index + 1, str.length) : str;
                 return str;
+            }
+
+            function lightenDarkenColor(col, amt) {
+
+                var usePound = false;
+
+                if (col[0] == "#") {
+                    col = col.slice(1);
+                    usePound = true;
+                }
+
+                var num = parseInt(col,16);
+
+                var r = (num >> 16) + amt;
+
+                if (r > 255) r = 255;
+                else if  (r < 0) r = 0;
+
+                var b = ((num >> 8) & 0x00FF) + amt;
+
+                if (b > 255) b = 255;
+                else if  (b < 0) b = 0;
+
+                var g = (num & 0x0000FF) + amt;
+
+                if (g > 255) g = 255;
+                else if (g < 0) g = 0;
+
+                return (usePound?"#":"") + (g | (b << 8) | (r << 16)).toString(16);
+
             }
 
             $.fn.textWidth = function () {
@@ -44,17 +88,17 @@
                     }
                 },
                 created: function () {
+                    this.tabCompleteIndex = 0;
+                    this.selectedColorLightenDarkenAmount = 20;
                     this.hideSuggestions = true;
                     this['jump-to-last-occurrence-of'] = this['jump-to-last-occurrence-of'] || '';
                 },
                 ready: function () {
                     var self = this;
                     var input = self.$.inputField;
-                    var listGroup = self.$.listgroup;
 
-                    listGroup.style.position = 'absolute';
-                    listGroup.style.zIndex = 99999;
-
+                    // Sometimes the {{items}} passed in is a JSON string and not an Array Object,
+                    // in those cases we just parse it as JSON to make it an Array Object.
                     self.items = typeof self.items === 'string' ? JSON.parse(self.items) : self.items || [];
 
                     input.addEventListener('focus', function () {
@@ -65,32 +109,61 @@
                     });
                 },
                 textChanged: function (oldVal, newVal) {
+                    // If new and old value is the same then return.
                     if (newVal === oldVal) return;
 
                     var self = this;
                     var char = self['jump-to-last-occurrence-of'];
                     var listGroup = self.$.listgroup;
                     var lastIndex = newVal.lastIndexOf(char);
+                    var parentLeftMargin = 15;
 
+                    // If new value, char and last index of char is greater then zero
                     if (newVal && char && lastIndex > 0) {
 
+                        // Get the string from start to the last occurrence of char,
+                        // then get the width of that string.
                         newVal = newVal.slice(0, lastIndex);
                         var input = $(self.$.inputField);
                         input.text(newVal);
                         var textWidth = input.textWidth();
 
-                        listGroup.style.left = textWidth + 15 + 'px';
+                        // Set left pos for the list group to text width + margin of parent
+                        //TODO: get the left margin of parent dynamically
+                        listGroup.style.left = textWidth + parentLeftMargin + 'px';
                     } else {
-                        listGroup.style.left = 15 + 'px';
+                        listGroup.style.left = parentLeftMargin + 'px';
                     }
                 },
                 filterItems: function (values, text) {
+                    // If text is not set then just return the values.
+                    if (!text) return values;
+
+                    // If jump-to-last-occurrence-of char is set,
+                    // then only match with the text to the right of the last occurrence of that char.
+                    // Otherwise match with the whole text.
                     var char = this['jump-to-last-occurrence-of'];
                     text = char ? _strRightBack(text, char) : text;
-                    var matches = _.filter(values, function (value) {
+
+                    // Filter values
+                    return _.filter(values, function (value) {
                         return _.contains(value.text, text);
                     });
-                    return this.text ? matches : values;
+                },
+                autoComplete: function () {
+                    console.log('tab');
+                    this.tabCompleteIndex = 0;
+                },
+                nextSuggestion: function () {
+                    console.log('arrow down');
+                    this.tabCompleteIndex++;
+                },
+                previousSuggestion: function () {
+                    console.log('arrow up');
+                    this.tabCompleteIndex--;
+                },
+                tabCompleteIndexChanged: function (newVal, oldVal) {
+                    if (newVal === oldVal) return;
                 }
             });
 
