@@ -21,6 +21,8 @@
     "angular-bind-polymer": "~0.0.1",
     "github-card": "pazguille/github-card",
     "github-fork-ribbon-css": "~0.1.1",
-    "polymer-keydown": "dmytroyarmak/polymer-keydown#~0.1.0"
+    "polymer-keydown": "furier/polymer-keydown#~1.0.0",
+    "bootstrap": "~3.2.0",
+    "lodash": "~2.4.1"
   }
 }

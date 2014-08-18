@@ -6,7 +6,7 @@
     <template>
 
         <!--STYLING / CSS-->
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../../bower_components/bootstrap/dist/css/bootstrap.min.css">
         <style>
             ss-list-group {
                 position: absolute;
@@ -17,7 +17,7 @@
         <!--SEMANTICS-->
         <input id="inputField" type="text" class="form-control"
                placeholder="{{placeholder}}" value="{{text}}">
-        <ss-list-group id="listgroup" items="{{items | filterItems(text)}}" hidden?="{{hideSuggestions}}"></ss-list-group>
+        <ss-list-group id="listGroup" items="{{items | filterItems(text)}}" navigable="true" selectedIndex="{{tabCompleteIndex}}" hidden?="{{hideSuggestions}}"></ss-list-group>
 
         <!--TAB-->
         <polymer-keydown code="9" on-keydown="{{autoComplete}}"></polymer-keydown>
@@ -27,47 +27,12 @@
         <polymer-keydown code="38" on-keydown="{{previousSuggestion}}"></polymer-keydown>
 
     </template>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+    <script src="../../bower_components/jquery/dist/jquery.js"></script>
+    <script src="../../bower_components/lodash/dist/lodash.min.js"></script>
     <script>
         (function ($) {
 
-            function _strRightBack(str, exp){
-                var index = str.lastIndexOf(exp);
-                str = index > -1 ? str.slice(index + 1, str.length) : str;
-                return str;
-            }
-
-            function lightenDarkenColor(col, amt) {
-
-                var usePound = false;
-
-                if (col[0] == "#") {
-                    col = col.slice(1);
-                    usePound = true;
-                }
-
-                var num = parseInt(col,16);
-
-                var r = (num >> 16) + amt;
-
-                if (r > 255) r = 255;
-                else if  (r < 0) r = 0;
-
-                var b = ((num >> 8) & 0x00FF) + amt;
-
-                if (b > 255) b = 255;
-                else if  (b < 0) b = 0;
-
-                var g = (num & 0x0000FF) + amt;
-
-                if (g > 255) g = 255;
-                else if (g < 0) g = 0;
-
-                return (usePound?"#":"") + (g | (b << 8) | (r << 16)).toString(16);
-
-            }
-
+            // get the width of a text
             $.fn.textWidth = function () {
                 $body = $('body');
                 $this = $(this);
@@ -80,6 +45,37 @@
                 return width;
             };
 
+            // get the string to the right of the last match
+            function _strRightBack(str, exp) {
+                var index = str.lastIndexOf(exp);
+                str = index > -1 ? str.slice(index + 1, str.length) : str;
+                return str;
+            }
+
+            function _moveDropDownToLastOccurenceOf(self, newVal) {
+                var char = self['jump-to-last-occurrence-of'];
+                var listGroup = self.$.listGroup;
+                var lastIndex = newVal.lastIndexOf(char);
+                var parentLeftMargin = 15;
+
+                // If new value, char and last index of char is greater then zero
+                if (newVal && char && lastIndex > 0) {
+
+                    // Get the string from start to the last occurrence of char,
+                    // then get the width of that string.
+                    newVal = newVal.slice(0, lastIndex);
+                    var input = $(self.$.inputField);
+                    input.text(newVal);
+                    var textWidth = input.textWidth();
+
+                    // Set left pos for the list group to text width + margin of parent
+                    //TODO: get the left margin of parent dynamically
+                    listGroup.style.left = textWidth + parentLeftMargin + 'px';
+                } else {
+                    listGroup.style.left = parentLeftMargin + 'px';
+                }
+            }
+
             Polymer({
                 publish: {
                     text: {
@@ -89,7 +85,6 @@
                 },
                 created: function () {
                     this.tabCompleteIndex = 0;
-                    this.selectedColorLightenDarkenAmount = 20;
                     this.hideSuggestions = true;
                     this['jump-to-last-occurrence-of'] = this['jump-to-last-occurrence-of'] || '';
                 },
@@ -111,29 +106,8 @@
                 textChanged: function (oldVal, newVal) {
                     // If new and old value is the same then return.
                     if (newVal === oldVal) return;
-
                     var self = this;
-                    var char = self['jump-to-last-occurrence-of'];
-                    var listGroup = self.$.listgroup;
-                    var lastIndex = newVal.lastIndexOf(char);
-                    var parentLeftMargin = 15;
-
-                    // If new value, char and last index of char is greater then zero
-                    if (newVal && char && lastIndex > 0) {
-
-                        // Get the string from start to the last occurrence of char,
-                        // then get the width of that string.
-                        newVal = newVal.slice(0, lastIndex);
-                        var input = $(self.$.inputField);
-                        input.text(newVal);
-                        var textWidth = input.textWidth();
-
-                        // Set left pos for the list group to text width + margin of parent
-                        //TODO: get the left margin of parent dynamically
-                        listGroup.style.left = textWidth + parentLeftMargin + 'px';
-                    } else {
-                        listGroup.style.left = parentLeftMargin + 'px';
-                    }
+                    _moveDropDownToLastOccurenceOf(self, newVal);
                 },
                 filterItems: function (values, text) {
                     // If text is not set then just return the values.
@@ -150,20 +124,26 @@
                         return _.contains(value.text, text);
                     });
                 },
-                autoComplete: function () {
+                autoComplete: function (e) {
+                    if (this.hideSuggestions) return;
                     console.log('tab');
+
+
+
+
+
                     this.tabCompleteIndex = 0;
+                    e.detail.originalEvent.preventDefault();
                 },
                 nextSuggestion: function () {
+                    if (this.hideSuggestions) return;
                     console.log('arrow down');
-                    this.tabCompleteIndex++;
+                    this.$.listGroup.nextIndex();
                 },
                 previousSuggestion: function () {
+                    if (this.hideSuggestions) return;
                     console.log('arrow up');
-                    this.tabCompleteIndex--;
-                },
-                tabCompleteIndexChanged: function (newVal, oldVal) {
-                    if (newVal === oldVal) return;
+                    this.$.listGroup.prevIndex();
                 }
             });
 

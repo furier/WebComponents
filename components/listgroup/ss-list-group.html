@@ -1,23 +1,146 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html"/>
-<link rel="import" href="ss-list.html"/>
+<link rel="import" href="ss-list-group-item.html"/>
 
-<polymer-element name="ss-list-group" attributes="items">
+<polymer-element name="ss-list-group" attributes="items nextIndex prevIndex">
     <template>
 
         <!--STYLING / CSS-->
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../../bower_components/bootstrap/dist/css/bootstrap.min.css">
 
         <!--SEMANTICS-->
-        <ss-list>
+        <ul id="listGroup" class="list-group">
             <template repeat="{{item in items}}">
-                <li class="list-group-item {{item.type}}">{{item.text}}</li>
+                <ss-list-group-item data-class="{{item.type}}">
+                    {{item.text}}
+                </ss-list-group-item>
             </template>
-        </ss-list>
+        </ul>
 
     </template>
+    <script src="../../bower_components/jquery/dist/jquery.js"></script>
     <script>
-        (function () {
-            Polymer({});
-        }());
+        (function ($) {
+
+            function _lightenDarkenColor(col, amt) {
+
+                var usePound = false;
+
+                if (col[0] === "#") {
+                    col = col.slice(1);
+                    usePound = true;
+                }
+
+                var num = parseInt(col, 16);
+
+                var r = (num >> 16) + amt;
+
+                if (r > 255) r = 255;
+                else if (r < 0) r = 0;
+
+                var b = ((num >> 8) & 0x00FF) + amt;
+
+                if (b > 255) b = 255;
+                else if (b < 0) b = 0;
+
+                var g = (num & 0x0000FF) + amt;
+
+                if (g > 255) g = 255;
+                else if (g < 0) g = 0;
+
+                return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
+
+            }
+
+            function _colorToHex(color) {
+                if (color.substr(0, 1) === '#') {
+                    return color;
+                }
+                var digits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(color);
+
+                var red = parseInt(digits[2]);
+                var green = parseInt(digits[3]);
+                var blue = parseInt(digits[4]);
+
+                var rgb = blue | (green << 8) | (red << 16);
+                return digits[1] + '#' + rgb.toString(16);
+            }
+
+            function _changeBackground(items, index, amt) {
+                var item = $(items[index]);
+                var currentColor = _colorToHex(item.css('background-color'));
+                var newColor = _lightenDarkenColor(currentColor, amt);
+                item.css('background-color', newColor);
+            }
+
+            function _inRange(list, index) {
+                return index >= 0 && index < list.length;
+            }
+
+            Polymer({
+                publish: {
+                    selectedindex: {
+                        value: null,
+                        reflect: true
+                    },
+                    navigable: {
+                        value: false
+                    }
+                },
+                created: function () {
+                    this.selectedColorLightenDarkenAmount = 25;
+                },
+                nextIndex: function () {
+                    if (!this.navigable) return;
+
+                    // if navigation is enabled but selected index was not set when starting to navigate
+                    if (this.selectedindex === null) {
+                        this.selectedindex = 0;
+                        return;
+                    }
+
+                    // if selectedindex is less then item.length - 1, just increase selectedindex by one.
+                    if (this.selectedindex < this.items.length - 1)
+                        this.selectedindex++;
+                    else
+                    // else the selectedindex has exceeded the items.length and we start over again on 0
+                        this.selectedindex = 0;
+                },
+                prevIndex: function () {
+                    if (!this.navigable) return;
+
+                    // if navigation is enabled but selected index was not set when starting to navigate
+                    if (this.selectedindex === null) {
+                        this.selectedindex = this.items.length - 1;
+                        return;
+                    }
+
+                    // if selectedindex is greater then 0, just decrease selectedindex by one.
+                    if (this.selectedindex > 0)
+                        this.selectedindex--;
+                    else
+                    // else the selectedindex has exceeded the lowest items index and we start on the top again at items.length - 1
+                        this.selectedindex = this.items.length - 1;
+                },
+                selectedindexChanged: function (oldVal, newVal) {
+                    if (!this.navigable || oldVal === newVal) return;
+
+                    if (_inRange(this.items, newVal)) {
+                        var items = $(this.$.listGroup).children('li');
+                        _changeBackground(items, newVal, -this.selectedColorLightenDarkenAmount);
+                        if (_inRange(this.items, oldVal)) {
+                            _changeBackground(items, oldVal, this.selectedColorLightenDarkenAmount);
+                        }
+                    }
+                },
+                itemsChanged: function (oldVal, newVal) {
+                    if (!this.navigable || oldVal === newVal) return;
+
+                    if (_inRange(newVal, this.selectedindex)) {
+                        var items = $(this.$.listGroup).children('li');
+                        _changeBackground(items, this.selectedindex, -this.selectedColorLightenDarkenAmount);
+                    }
+                }
+            });
+        }(jQuery));
     </script>
 </polymer-element>

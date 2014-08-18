@@ -1,0 +1,32 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html"/>
+
+<polymer-element name="ss-list-group-item" attributes="data-class">
+    <template>
+
+        <!--STYLING / CSS-->
+        <link rel="stylesheet" href="../../bower_components/bootstrap/dist/css/bootstrap.min.css">
+
+        <!--SEMANTICS-->
+        <li id="item" class="list-group-item {{data-class}} {{{active: selected}}}">
+            <content></content>
+        </li>
+
+    </template>
+    <script>
+        Polymer({
+            publish: {
+                selected: {
+                    value: false,
+                    reflect: true
+                },
+                selectedChanged: function (oldVal, newVal) {
+                    if (oldVal === newVal) return;
+                    if (newVal)
+                        this.fire('selected', this.$.item);
+                    else
+                        this.fire('deselected', this.$.item);
+                }
+            }
+        });
+    </script>
+</polymer-element>
