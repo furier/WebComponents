@@ -1,7 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html"/>
 <link rel="import" href="ss-list-group-item.html"/>
 
-<polymer-element name="ss-list-group" attributes="items nextIndex prevIndex">
+<polymer-element name="ss-list-group" attributes="items selectNext selectPrev">
     <template>
 
         <!--STYLING / CSS-->
@@ -10,14 +10,15 @@
         <!--SEMANTICS-->
         <ul id="listGroup" class="list-group">
             <template repeat="{{item in items}}">
-                <ss-list-group-item data-class="{{item.type}}">
+                <ss-list-group-item type="{{item.type}}" element="{{item.element}}">
                     {{item.text}}
                 </ss-list-group-item>
             </template>
         </ul>
 
     </template>
-    <script src="../../bower_components/jquery/dist/jquery.js"></script>
+    <script src="../../bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="../../bower_components/lodash/dist/lodash.min.js"></script>
     <script>
         (function ($) {
 
@@ -76,68 +77,68 @@
                 return index >= 0 && index < list.length;
             }
 
+            function _itemSelected(e, item, amt) {
+                var currentColor = item.element.style.backgroundColor;
+                item.element.style.backgroundColor = _lightenDarkenColor(currentColor, amt);
+            }
+
+            function _itemDeselected(e, item) {
+                var currentColor = item.element.style.backgroundColor;
+                item.element.style.backgroundColor = _lightenDarkenColor(currentColor, amt);
+            }
+
             Polymer({
                 publish: {
                     selectedindex: {
                         value: null,
                         reflect: true
                     },
-                    navigable: {
-                        value: false
+                    selecteditem: {
+                        value: null,
+                        reflect: true
                     }
                 },
                 created: function () {
                     this.selectedColorLightenDarkenAmount = 25;
                 },
-                nextIndex: function () {
-                    if (!this.navigable) return;
+                selectNext: function () {
+                    if (!this.selectedindex) return;
 
-                    // if navigation is enabled but selected index was not set when starting to navigate
-                    if (this.selectedindex === null) {
-                        this.selectedindex = 0;
-                        return;
-                    }
+                    var i = this.selectedindex;
+                    var ic = this.items.length;
 
-                    // if selectedindex is less then item.length - 1, just increase selectedindex by one.
-                    if (this.selectedindex < this.items.length - 1)
+                    if (i < ic - 1)
                         this.selectedindex++;
                     else
-                    // else the selectedindex has exceeded the items.length and we start over again on 0
                         this.selectedindex = 0;
+
+
                 },
-                prevIndex: function () {
-                    if (!this.navigable) return;
+                selectPrev: function () {
+                    if (!this.selectedindex) return;
 
-                    // if navigation is enabled but selected index was not set when starting to navigate
-                    if (this.selectedindex === null) {
-                        this.selectedindex = this.items.length - 1;
-                        return;
-                    }
+                    var i = this.selectedindex;
+                    var ic = this.items.length;
 
-                    // if selectedindex is greater then 0, just decrease selectedindex by one.
-                    if (this.selectedindex > 0)
+                    if (i > 0)
                         this.selectedindex--;
                     else
-                    // else the selectedindex has exceeded the lowest items index and we start on the top again at items.length - 1
-                        this.selectedindex = this.items.length - 1;
-                },
-                selectedindexChanged: function (oldVal, newVal) {
-                    if (!this.navigable || oldVal === newVal) return;
-
-                    if (_inRange(this.items, newVal)) {
-                        var items = $(this.$.listGroup).children('li');
-                        _changeBackground(items, newVal, -this.selectedColorLightenDarkenAmount);
-                        if (_inRange(this.items, oldVal)) {
-                            _changeBackground(items, oldVal, this.selectedColorLightenDarkenAmount);
-                        }
-                    }
+                        this.selectedindex = ic - 1;
                 },
                 itemsChanged: function (oldVal, newVal) {
-                    if (!this.navigable || oldVal === newVal) return;
+                    if (oldVal === newVal) return;
+                    var amt = this.selectedColorLightenDarkenAmount;
 
-                    if (_inRange(newVal, this.selectedindex)) {
-                        var items = $(this.$.listGroup).children('li');
-                        _changeBackground(items, this.selectedindex, -this.selectedColorLightenDarkenAmount);
+                    if (newVal && newVal.length > 0) {
+                        _.forEach(this.items, function (value) {
+                            var item = $(value);
+                            item.on('selected', function (e) {
+                                _itemSelected(e, item, -amt);
+                            });
+                            item.on('deselected', function(e) {
+                                _itemDeselected(e, item, amt);
+                            });
+                        })
                     }
                 }
             });

@@ -27,7 +27,7 @@
         <polymer-keydown code="38" on-keydown="{{previousSuggestion}}"></polymer-keydown>
 
     </template>
-    <script src="../../bower_components/jquery/dist/jquery.js"></script>
+    <script src="../../bower_components/jquery/dist/jquery.min.js"></script>
     <script src="../../bower_components/lodash/dist/lodash.min.js"></script>
     <script>
         (function ($) {
@@ -138,12 +138,12 @@
                 nextSuggestion: function () {
                     if (this.hideSuggestions) return;
                     console.log('arrow down');
-                    this.$.listGroup.nextIndex();
+                    this.$.listGroup.selectNext();
                 },
                 previousSuggestion: function () {
                     if (this.hideSuggestions) return;
                     console.log('arrow up');
-                    this.$.listGroup.prevIndex();
+                    this.$.listGroup.selectPrev();
                 }
             });
 

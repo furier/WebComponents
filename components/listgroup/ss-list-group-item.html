@@ -1,13 +1,13 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html"/>
 
-<polymer-element name="ss-list-group-item" attributes="data-class">
+<polymer-element name="ss-list-group-item" attributes="type">
     <template>
 
         <!--STYLING / CSS-->
         <link rel="stylesheet" href="../../bower_components/bootstrap/dist/css/bootstrap.min.css">
 
         <!--SEMANTICS-->
-        <li id="item" class="list-group-item {{data-class}} {{{active: selected}}}">
+        <li id="item" class="list-group-item {{type}} {{{active: selected} | tokenList}}">
             <content></content>
         </li>
 
@@ -19,13 +19,20 @@
                     value: false,
                     reflect: true
                 },
-                selectedChanged: function (oldVal, newVal) {
-                    if (oldVal === newVal) return;
-                    if (newVal)
-                        this.fire('selected', this.$.item);
-                    else
-                        this.fire('deselected', this.$.item);
+                element: {
+                    value: null,
+                    reflect: true
                 }
+            },
+            ready: function () {
+                this.element = this.$.item;
+            },
+            selectedChanged: function (oldVal, newVal) {
+                if (oldVal === newVal) return;
+                if (newVal)
+                    this.fire('selected');
+                else
+                    this.fire('deselected');
             }
         });
     </script>
