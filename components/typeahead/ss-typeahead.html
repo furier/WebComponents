@@ -30,7 +30,6 @@
 
     </template>
     <script src="../../bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="../../bower_components/lodash/dist/lodash.min.js"></script>
     <script>
         (function ($) {
 
@@ -61,20 +60,33 @@
                 return str;
             }
 
-            function _moveDropDownToLastOccurenceOf(self, newVal) {
+            function _filterItems(items, callback) {
+                var matches = [];
+                for (var i = 0; i < items.length; i++) {
+                    if (callback(items[i]))
+                        matches.push(items[i]);
+                }
+                return matches;
+            }
+
+            function _contains(array, exp) {
+                return array.indexOf(exp) > -1;
+            }
+
+            function _moveDropDownToLastOccurenceOf(self, str) {
                 var char = self['jump-to-last-occurrence-of'];
                 var listGroup = self.$.listGroup;
-                var lastIndex = newVal.lastIndexOf(char);
+                var lastIndex = str.lastIndexOf(char);
                 var parentLeftMargin = 15;
 
                 // If new value, char and last index of char is greater then zero
-                if (newVal && char && lastIndex > 0) {
+                if (str && char && lastIndex > 0) {
 
                     // Get the string from start to the last occurrence of char,
                     // then get the width of that string.
-                    newVal = newVal.slice(0, lastIndex);
+                    str = str.slice(0, lastIndex);
                     var input = $(self.$.inputField);
-                    input.text(newVal);
+                    input.text(str);
                     var textWidth = input.textWidth();
 
                     // Set left pos for the list group to text width + margin of parent
@@ -85,13 +97,13 @@
                 }
             }
 
-            function _setSelectedItemByIndex(index) {
-                for (var i = 0; i < this.items.length; i++) {
-                    this.items[i].selected = false;
+            function _setSelectedItemByIndex(self, list, index) {
+                for (var i = 0; i < list.length; i++) {
+                    list[i].selected = false;
                 }
-                this.tabCompleteIndex = index;
-                this.tabCompleteItem = this.items[index];
-                this.tabCompleteItem.selected = true;
+                self.tabCompleteIndex = index;
+                self.tabCompleteItem = list[index];
+                self.tabCompleteItem.selected = true;
             }
 
             Polymer({
@@ -137,19 +149,30 @@
                     text = char ? _strRightBack(text, char) : text;
 
                     // Filter values
-                    return _.filter(values, function (value) {
+                    var filteredItems = _filterItems(values, function (value) {
                         // If its an exact match we don't want to show that one as a suggestion.
-                        return value.text === text ? false : _.contains(value.text, text);
+                        return value.text === text ? false : _contains(value.text, text);
                     });
+
+                    // After filtering items, the previous selected item may not exist in the suggestion list
+                    // If it exist it may have changed index, so we need to update with the correct index
+                    var index = filteredItems.indexOf(this.tabCompleteItem);
+                    if (index > -1) {
+                        _setSelectedItemByIndex(this, filteredItems, index);
+                    } else {
+                        _setSelectedItemByIndex(this, filteredItems, 0);
+                    }
+
+                    return filteredItems;
                 },
                 autoComplete: function (e) {
                     if (this.hideSuggestions) return;
 
                     var char = this['jump-to-last-occurrence-of'];
                     var baseText = char ? _strLeftBack(this.text, char) : this.text;
-                    this.text = baseText + this.tabCompleteItem.text;
+                    this.text = _contains(baseText, char) ? baseText + this.tabCompleteItem.text : this.tabCompleteItem.text;
 
-                    _setSelectedItemByIndex.call(this, 0);
+                    _setSelectedItemByIndex(this, this.items, 0);
                     e.detail.originalEvent.preventDefault();
                 },
                 nextSuggestion: function () {
