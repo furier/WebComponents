@@ -57,7 +57,7 @@
             // get the string to the left og the last match
             function _strLeftBack(str, exp) {
                 var index = str.lastIndexOf(exp);
-                str = index > -1 ? str.slice(0, index) : str;
+                str = index > -1 ? str.slice(0, index + 1) : str;
                 return str;
             }
 
@@ -83,6 +83,15 @@
                 } else {
                     listGroup.style.left = parentLeftMargin + 'px';
                 }
+            }
+
+            function _setSelectedItemByIndex(index) {
+                for (var i = 0; i < this.items.length; i++) {
+                    this.items[i].selected = false;
+                }
+                this.tabCompleteIndex = index;
+                this.tabCompleteItem = this.items[index];
+                this.tabCompleteItem.selected = true;
             }
 
             Polymer({
@@ -138,11 +147,9 @@
 
                     var char = this['jump-to-last-occurrence-of'];
                     var baseText = char ? _strLeftBack(this.text, char) : this.text;
-                    this.text = char ? baseText + char + this.tabCompleteItem.text : baseText + this.tabCompleteItem.text;
+                    this.text = baseText + this.tabCompleteItem.text;
 
-                    this.tabCompleteItem.selected = false;
-                    this.tabCompleteIndex = 0;
-                    this.tabCompleteItem.selected = true;
+                    _setSelectedItemByIndex.call(this, 0);
                     e.detail.originalEvent.preventDefault();
                 },
                 nextSuggestion: function () {
