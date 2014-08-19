@@ -17,10 +17,12 @@
         <!--SEMANTICS-->
         <input id="inputField" type="text" class="form-control"
                placeholder="{{placeholder}}" value="{{text}}">
-        <ss-list-group id="listGroup" items="{{items | filterItems(text)}}" navigable="true" selectedIndex="{{tabCompleteIndex}}" hidden?="{{hideSuggestions}}"></ss-list-group>
+        <ss-list-group id="listGroup" items="{{items | filterItems(text)}}" selectedindex="{{tabCompleteIndex}}" selecteditem="{{tabCompleteItem}}" hidden?="{{hideSuggestions}}"></ss-list-group>
 
         <!--TAB-->
         <polymer-keydown code="9" on-keydown="{{autoComplete}}"></polymer-keydown>
+        <!--ENTER-->
+        <polymer-keydown code="13" on-keydown="{{autoComplete}}"></polymer-keydown>
         <!--ARROW DOWN-->
         <polymer-keydown code="40" on-keydown="{{nextSuggestion}}"></polymer-keydown>
         <!--ARROW UP-->
@@ -49,6 +51,13 @@
             function _strRightBack(str, exp) {
                 var index = str.lastIndexOf(exp);
                 str = index > -1 ? str.slice(index + 1, str.length) : str;
+                return str;
+            }
+
+            // get the string to the left og the last match
+            function _strLeftBack(str, exp) {
+                var index = str.lastIndexOf(exp);
+                str = index > -1 ? str.slice(0, index) : str;
                 return str;
             }
 
@@ -106,8 +115,7 @@
                 textChanged: function (oldVal, newVal) {
                     // If new and old value is the same then return.
                     if (newVal === oldVal) return;
-                    var self = this;
-                    _moveDropDownToLastOccurenceOf(self, newVal);
+                    _moveDropDownToLastOccurenceOf(this, newVal);
                 },
                 filterItems: function (values, text) {
                     // If text is not set then just return the values.
@@ -121,28 +129,28 @@
 
                     // Filter values
                     return _.filter(values, function (value) {
-                        return _.contains(value.text, text);
+                        // If its an exact match we don't want to show that one as a suggestion.
+                        return value.text === text ? false : _.contains(value.text, text);
                     });
                 },
                 autoComplete: function (e) {
                     if (this.hideSuggestions) return;
-                    console.log('tab');
 
+                    var char = this['jump-to-last-occurrence-of'];
+                    var baseText = char ? _strLeftBack(this.text, char) : this.text;
+                    this.text = char ? baseText + char + this.tabCompleteItem.text : baseText + this.tabCompleteItem.text;
 
-
-
-
+                    this.tabCompleteItem.selected = false;
                     this.tabCompleteIndex = 0;
+                    this.tabCompleteItem.selected = true;
                     e.detail.originalEvent.preventDefault();
                 },
                 nextSuggestion: function () {
                     if (this.hideSuggestions) return;
-                    console.log('arrow down');
                     this.$.listGroup.selectNext();
                 },
                 previousSuggestion: function () {
                     if (this.hideSuggestions) return;
-                    console.log('arrow up');
                     this.$.listGroup.selectPrev();
                 }
             });

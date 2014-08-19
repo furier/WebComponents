@@ -10,81 +10,43 @@
         <!--SEMANTICS-->
         <ul id="listGroup" class="list-group">
             <template repeat="{{item in items}}">
-                <ss-list-group-item type="{{item.type}}" element="{{item.element}}">
+                <ss-list-group-item type="{{item.type}}" selected="{{item.selected}}">
                     {{item.text}}
                 </ss-list-group-item>
             </template>
         </ul>
 
     </template>
-    <script src="../../bower_components/jquery/dist/jquery.min.js"></script>
     <script src="../../bower_components/lodash/dist/lodash.min.js"></script>
     <script>
-        (function ($) {
+        (function () {
 
-            function _lightenDarkenColor(col, amt) {
+            function _setNextIndex() {
+                var i = this.selectedindex;
+                var ic = this.items.length;
+                if (i < ic - 1)
+                    this.selectedindex++;
+                else
+                    this.selectedindex = 0;
 
-                var usePound = false;
-
-                if (col[0] === "#") {
-                    col = col.slice(1);
-                    usePound = true;
+                return {
+                    oldIndex: i,
+                    newIndex: this.selectedindex
                 }
-
-                var num = parseInt(col, 16);
-
-                var r = (num >> 16) + amt;
-
-                if (r > 255) r = 255;
-                else if (r < 0) r = 0;
-
-                var b = ((num >> 8) & 0x00FF) + amt;
-
-                if (b > 255) b = 255;
-                else if (b < 0) b = 0;
-
-                var g = (num & 0x0000FF) + amt;
-
-                if (g > 255) g = 255;
-                else if (g < 0) g = 0;
-
-                return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
-
             }
 
-            function _colorToHex(color) {
-                if (color.substr(0, 1) === '#') {
-                    return color;
+            function _setPrevIndex() {
+                var i = this.selectedindex;
+                var ic = this.items.length;
+                if (i > 0)
+                    this.selectedindex--;
+                else
+                    this.selectedindex = ic - 1;
+
+                return {
+                    oldIndex: i,
+                    newIndex: this.selectedindex
                 }
-                var digits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(color);
-
-                var red = parseInt(digits[2]);
-                var green = parseInt(digits[3]);
-                var blue = parseInt(digits[4]);
-
-                var rgb = blue | (green << 8) | (red << 16);
-                return digits[1] + '#' + rgb.toString(16);
-            }
-
-            function _changeBackground(items, index, amt) {
-                var item = $(items[index]);
-                var currentColor = _colorToHex(item.css('background-color'));
-                var newColor = _lightenDarkenColor(currentColor, amt);
-                item.css('background-color', newColor);
-            }
-
-            function _inRange(list, index) {
-                return index >= 0 && index < list.length;
-            }
-
-            function _itemSelected(e, item, amt) {
-                var currentColor = item.element.style.backgroundColor;
-                item.element.style.backgroundColor = _lightenDarkenColor(currentColor, amt);
-            }
-
-            function _itemDeselected(e, item) {
-                var currentColor = item.element.style.backgroundColor;
-                item.element.style.backgroundColor = _lightenDarkenColor(currentColor, amt);
             }
 
             Polymer({
@@ -101,47 +63,33 @@
                 created: function () {
                     this.selectedColorLightenDarkenAmount = 25;
                 },
+                domReady: function () {
+                    if (this.selectedindex !== null) {
+                        var selectedItem = this.items[this.selectedindex];
+                        selectedItem.selected = true;
+                        this.selecteditem = selectedItem;
+                    }
+                },
                 selectNext: function () {
-                    if (!this.selectedindex) return;
-
-                    var i = this.selectedindex;
-                    var ic = this.items.length;
-
-                    if (i < ic - 1)
-                        this.selectedindex++;
-                    else
-                        this.selectedindex = 0;
-
-
+                    if (this.selectedindex === null) return;
+                    var result = _setNextIndex.call(this);
+                    this.items[result.oldIndex].selected = false;
+                    var selectedItem = this.items[result.newIndex];
+                    selectedItem.selected = true;
+                    this.selecteditem = selectedItem;
                 },
                 selectPrev: function () {
-                    if (!this.selectedindex) return;
-
-                    var i = this.selectedindex;
-                    var ic = this.items.length;
-
-                    if (i > 0)
-                        this.selectedindex--;
-                    else
-                        this.selectedindex = ic - 1;
+                    if (this.selectedindex === null) return;
+                    var result = _setPrevIndex.call(this);
+                    this.items[result.oldIndex].selected = false;
+                    var selectedItem = this.items[result.newIndex];
+                    selectedItem.selected = true;
+                    this.selecteditem = selectedItem;
                 },
-                itemsChanged: function (oldVal, newVal) {
-                    if (oldVal === newVal) return;
-                    var amt = this.selectedColorLightenDarkenAmount;
-
-                    if (newVal && newVal.length > 0) {
-                        _.forEach(this.items, function (value) {
-                            var item = $(value);
-                            item.on('selected', function (e) {
-                                _itemSelected(e, item, -amt);
-                            });
-                            item.on('deselected', function(e) {
-                                _itemDeselected(e, item, amt);
-                            });
-                        })
-                    }
+                selectedindexChanged: function () {
+                    
                 }
             });
-        }(jQuery));
+        }());
     </script>
 </polymer-element>
