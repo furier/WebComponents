@@ -1,5 +1,4 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html"/>
-<link rel="import" href="ss-list-group-item.html"/>
 
 <polymer-element name="ss-list-group" attributes="items filtertext navigable">
     <template>
@@ -10,9 +9,9 @@
         <!--SEMANTICS-->
         <ul id="listGroup" class="list-group">
             <template repeat="{{item in items | filterItems(filtertext)}}">
-                <ss-list-group-item type="{{item.type}}" selected="{{item.selected}}">
+                <li id="item" class="list-group-item {{item.type}} {{{active: item.selected} | tokenList}}">
                     {{item.text}}
-                </ss-list-group-item>
+                </li>
             </template>
         </ul>
 
