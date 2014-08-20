@@ -17,7 +17,7 @@
         <!--SEMANTICS-->
         <input id="inputField" type="text" class="form-control"
                placeholder="{{placeholder}}" value="{{text}}">
-        <ss-list-group id="listGroup" items="{{items | filterItems(text)}}" selectedindex="{{tabCompleteIndex}}" selecteditem="{{tabCompleteItem}}" hidden?="{{hideSuggestions}}"></ss-list-group>
+        <ss-list-group id="listGroup" items="{{items}}" selecteditem="{{tabCompleteItem}}" filtertext="{{text | parseFilterText}}" navigable="true" hidden?="{{hideSuggestions}}"></ss-list-group>
 
         <!--TAB-->
         <polymer-keydown code="9" on-keydown="{{autoComplete}}"></polymer-keydown>
@@ -60,17 +60,8 @@
                 return str;
             }
 
-            function _filterItems(items, callback) {
-                var matches = [];
-                for (var i = 0; i < items.length; i++) {
-                    if (callback(items[i]))
-                        matches.push(items[i]);
-                }
-                return matches;
-            }
-
-            function _contains(array, exp) {
-                return array.indexOf(exp) > -1;
+            function _contains(list, exp) {
+                return list.indexOf(exp) > -1;
             }
 
             function _moveDropDownToLastOccurenceOf(self, str) {
@@ -97,15 +88,6 @@
                 }
             }
 
-            function _setSelectedItemByIndex(self, list, index) {
-                for (var i = 0; i < list.length; i++) {
-                    list[i].selected = false;
-                }
-                self.tabCompleteIndex = index;
-                self.tabCompleteItem = list[index];
-                self.tabCompleteItem.selected = true;
-            }
-
             Polymer({
                 publish: {
                     text: {
@@ -114,17 +96,12 @@
                     }
                 },
                 created: function () {
-                    this.tabCompleteIndex = 0;
                     this.hideSuggestions = true;
                     this['jump-to-last-occurrence-of'] = this['jump-to-last-occurrence-of'] || '';
                 },
                 ready: function () {
                     var self = this;
                     var input = self.$.inputField;
-
-                    // Sometimes the {{items}} passed in is a JSON string and not an Array Object,
-                    // in those cases we just parse it as JSON to make it an Array Object.
-                    self.items = typeof self.items === 'string' ? JSON.parse(self.items) : self.items || [];
 
                     input.addEventListener('focus', function () {
                         self.hideSuggestions = false;
@@ -133,47 +110,31 @@
                         self.hideSuggestions = true;
                     });
                 },
-                textChanged: function (oldVal, newVal) {
-                    // If new and old value is the same then return.
-                    if (newVal === oldVal) return;
-                    _moveDropDownToLastOccurenceOf(this, newVal);
+                domReady: function () {
+                    this.$.listGroup.selectIndex(0);
                 },
-                filterItems: function (values, text) {
-                    // If text is not set then just return the values.
-                    if (!text) return values;
-
+                textChanged: function (oldText, newText) {
+                    // If new and old text is the same then return.
+                    if (newText === oldText) return;
+                    _moveDropDownToLastOccurenceOf(this, newText);
+                },
+                parseFilterText: function(text) {
+                    if (typeof text !== 'string' || text === '') return '';
                     // If jump-to-last-occurrence-of char is set,
                     // then only match with the text to the right of the last occurrence of that char.
                     // Otherwise match with the whole text.
                     var char = this['jump-to-last-occurrence-of'];
-                    text = char ? _strRightBack(text, char) : text;
-
-                    // Filter values
-                    var filteredItems = _filterItems(values, function (value) {
-                        // If its an exact match we don't want to show that one as a suggestion.
-                        return value.text === text ? false : _contains(value.text, text);
-                    });
-
-                    // After filtering items, the previous selected item may not exist in the suggestion list
-                    // If it exist it may have changed index, so we need to update with the correct index
-                    var index = filteredItems.indexOf(this.tabCompleteItem);
-                    if (index > -1) {
-                        _setSelectedItemByIndex(this, filteredItems, index);
-                    } else {
-                        _setSelectedItemByIndex(this, filteredItems, 0);
-                    }
-
-                    return filteredItems;
+                    return char ? _strRightBack(text, char) : text;
                 },
                 autoComplete: function (e) {
                     if (this.hideSuggestions) return;
+                    e.detail.originalEvent.preventDefault();
 
                     var char = this['jump-to-last-occurrence-of'];
                     var baseText = char ? _strLeftBack(this.text, char) : this.text;
                     this.text = _contains(baseText, char) ? baseText + this.tabCompleteItem.text : this.tabCompleteItem.text;
 
-                    _setSelectedItemByIndex(this, this.items, 0);
-                    e.detail.originalEvent.preventDefault();
+                    this.$.listGroup.selectIndex(0);
                 },
                 nextSuggestion: function () {
                     if (this.hideSuggestions) return;
