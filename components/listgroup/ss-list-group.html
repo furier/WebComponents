@@ -18,6 +18,7 @@
     </template>
     <script>
         (function () {
+            var component;
 
             function _filterItems(items, callback) {
                 if (!items) return [];
@@ -82,10 +83,13 @@
                         reflect: true
                     }
                 },
+                created: function () {
+                    component = this;
+                },
                 ready: function() {
                     // Sometimes the {{items}} passed in is a JSON string and not an Array Object,
                     // in those cases we just parse it as JSON to make it an Array Object.
-                    this.items = typeof this.items === 'string' ? JSON.parse(this.items) : this.items || [];
+                    component.items = typeof component.items === 'string' ? JSON.parse(component.items) : component.items || [];
                 },
                 filterItems: function (items, filterText) {
                     if (!filterText) return items;
@@ -97,31 +101,31 @@
                         return item.text === filterText ? false : _contains(item.text, filterText);
                     });
 
-                    if (this.navigable && !_contains(filteredItems, this.selecteditem)) {
-                        _selectIndex(this, filteredItems, 0);
+                    if (component.navigable && !_contains(filteredItems, component.selecteditem)) {
+                        _selectIndex(component, filteredItems, 0);
                     }
 
                     return  filteredItems;
                 },
                 selectIndex: function (index) {
-                    if (!this.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to set selected index.');
-                    _selectIndex(this, this.items, index);
+                    if (!component.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to set selected index.');
+                    _selectIndex(component, component.items, index);
                 },
                 selectNext: function () {
-                    if (!this.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to select next index.');
-                    var result = _setNextIndex(this);
-                    this.items[result.oldIndex].selected = false;
-                    var selectedItem = this.items[result.newIndex];
+                    if (!component.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to select next index.');
+                    var result = _setNextIndex(component);
+                    component.items[result.oldIndex].selected = false;
+                    var selectedItem = component.items[result.newIndex];
                     selectedItem.selected = true;
-                    this.selecteditem = selectedItem;
+                    component.selecteditem = selectedItem;
                 },
                 selectPrev: function () {
-                    if (!this.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to select previous index.');
-                    var result = _setPrevIndex(this);
-                    this.items[result.oldIndex].selected = false;
-                    var selectedItem = this.items[result.newIndex];
+                    if (!component.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to select previous index.');
+                    var result = _setPrevIndex(component);
+                    component.items[result.oldIndex].selected = false;
+                    var selectedItem = component.items[result.newIndex];
                     selectedItem.selected = true;
-                    this.selecteditem = selectedItem;
+                    component.selecteditem = selectedItem;
                 }
             });
         }());

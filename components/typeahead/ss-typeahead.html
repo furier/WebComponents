@@ -32,6 +32,8 @@
     <script src="../../bower_components/jquery/dist/jquery.min.js"></script>
     <script>
         (function ($) {
+            // The Polymer component
+            var component;
 
             // get the width of a text
             $.fn.textWidth = function () {
@@ -96,53 +98,53 @@
                     }
                 },
                 created: function () {
-                    this.hideSuggestions = true;
-                    this['jump-to-last-occurrence-of'] = this['jump-to-last-occurrence-of'] || '';
+                    component = this;
+                    component.hideSuggestions = true;
+                    component['jump-to-last-occurrence-of'] = component['jump-to-last-occurrence-of'] || '';
                 },
                 ready: function () {
-                    var self = this;
-                    var input = self.$.inputField;
+                    var input = component.$.inputField;
 
                     input.addEventListener('focus', function () {
-                        self.hideSuggestions = false;
+                        component.hideSuggestions = false;
                     });
                     input.addEventListener('blur', function () {
-                        self.hideSuggestions = true;
+                        component.hideSuggestions = true;
                     });
                 },
                 domReady: function () {
-                    this.$.listGroup.selectIndex(0);
+                    component.$.listGroup.selectIndex(0);
                 },
                 textChanged: function (oldText, newText) {
                     // If new and old text is the same then return.
                     if (newText === oldText) return;
-                    _moveDropDownToLastOccurenceOf(this, newText);
+                    _moveDropDownToLastOccurenceOf(component, newText);
                 },
                 parseFilterText: function(text) {
                     if (typeof text !== 'string' || text === '') return '';
                     // If jump-to-last-occurrence-of char is set,
                     // then only match with the text to the right of the last occurrence of that char.
                     // Otherwise match with the whole text.
-                    var char = this['jump-to-last-occurrence-of'];
+                    var char = component['jump-to-last-occurrence-of'];
                     return char ? _strRightBack(text, char) : text;
                 },
                 autoComplete: function (e) {
-                    if (this.hideSuggestions) return;
+                    if (component.hideSuggestions) return;
                     e.detail.originalEvent.preventDefault();
 
-                    var char = this['jump-to-last-occurrence-of'];
-                    var baseText = char ? _strLeftBack(this.text, char) : this.text;
-                    this.text = _contains(baseText, char) ? baseText + this.tabCompleteItem.text : this.tabCompleteItem.text;
+                    var char = component['jump-to-last-occurrence-of'];
+                    var baseText = char ? _strLeftBack(component.text, char) : component.text;
+                    component.text = _contains(baseText, char) ? baseText + component.tabCompleteItem.text : component.tabCompleteItem.text;
 
-                    this.$.listGroup.selectIndex(0);
+                    component.$.listGroup.selectIndex(0);
                 },
                 nextSuggestion: function () {
-                    if (this.hideSuggestions) return;
-                    this.$.listGroup.selectNext();
+                    if (component.hideSuggestions) return;
+                    component.$.listGroup.selectNext();
                 },
                 previousSuggestion: function () {
-                    if (this.hideSuggestions) return;
-                    this.$.listGroup.selectPrev();
+                    if (component.hideSuggestions) return;
+                    component.$.listGroup.selectPrev();
                 }
             });
 
