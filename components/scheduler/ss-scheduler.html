@@ -251,7 +251,7 @@
                             case YEAR:
                                 this.hideHourAndMinute = false;
                                 this.hideMonthAndDay = false;
-                                this.days = generateDaysOptions(this.selectedMonth === 'string'
+                                this.days = generateDaysOptions(typeof this.selectedMonth === 'string'
                                                                 ? parseInt(this.selectedMonth, 10) + 1
                                                                 : 1);
                                 break;
