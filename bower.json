@@ -1,0 +1,28 @@
+{
+  "name": "WebComponents",
+  "version": "1.0.0",
+  "description": "[Polymer](http://www.polymer-project.org/) Custom WebComponents",
+  "authors": [
+    "Sander Struijk <sander.struijk@gmail.com>"
+  ],
+  "keywords": [
+    "components"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.4.0",
+    "angular-bind-polymer": "~0.0.1",
+    "github-card": "pazguille/github-card",
+    "github-fork-ribbon-css": "~0.1.1",
+    "polymer-keydown": "furier/polymer-keydown#~0.2.0",
+    "bootstrap": "~3.2.0",
+    "lodash": "~2.4.1"
+  }
+}
