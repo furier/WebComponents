@@ -117,7 +117,7 @@
                 },
                 textChanged: function (oldText, newText) {
                     // If new and old text is the same then return.
-                    if (newText === oldText) return;
+                    if (oldText === newText) return;
                     _moveDropDownToLastOccurenceOf(component, newText);
                 },
                 parseFilterText: function(text) {

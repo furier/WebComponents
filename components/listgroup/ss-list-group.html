@@ -8,7 +8,7 @@
 
         <!--SEMANTICS-->
         <ul id="listGroup" class="list-group">
-            <template repeat="{{item in items | filterItems(filtertext)}}">
+            <template repeat="{{item in filteredItems}}">
                 <li id="item" class="list-group-item {{item.type}} {{{active: item.selected} | tokenList}}">
                     {{item.text}}
                 </li>
@@ -30,50 +30,36 @@
                 return matches;
             }
 
-            function _contains(list, exp) {
-                return list.indexOf(exp) > -1;
+            function _contains(list, item) {
+                return list.indexOf(item) > -1;
             }
 
-            function _setNextIndex(self) {
-                if (self.selectedIndex === null) throw new Error('ss-list-group: set attribute navigable="true" to be able to set selected index, ' +
-                                                                 'and then use the selectIndex(index) method to select an initial index before trying to select next index.');
-                var i = self.selectedIndex;
-                var ic = self.items.length;
-                if (i < ic - 1)
-                    self.selectedIndex++;
-                else
-                    self.selectedIndex = 0;
-
-                return {
-                    oldIndex: i,
-                    newIndex: self.selectedIndex
-                }
-            }
-
-            function _setPrevIndex(self) {
-                if (self.selectedIndex === null) throw new Error('ss-list-group: set attribute navigable="true" to be able to set selected index, ' +
-                                                                 'and then use the selectIndex(index) method to select an initial index before trying to select previous index.');
-                var i = self.selectedIndex;
-                var ic = self.items.length;
-                if (i > 0)
-                    self.selectedIndex--;
-                else
-                    self.selectedIndex = ic - 1;
-
-                return {
-                    oldIndex: i,
-                    newIndex: self.selectedIndex
-                }
-            }
-
-            function _selectIndex(self, list, index) {
-                self.selectedIndex = index;
-                self.items.forEach(function (item) {
+            function _setSelectedIndex(filteredItems, index) {
+                component.selectedIndex = index;
+                component.items.forEach(function (item) {
                     item.selected = false;
                 });
-                var selectedItem = list[index];
+                var selectedItem = filteredItems[index];
+                if (!selectedItem) {
+                    selectedItem = component.items[0];
+                }
                 selectedItem.selected = true;
-                self.selecteditem = selectedItem;
+                component.selecteditem = selectedItem;
+            }
+
+            function _getSelectedIndex() {
+                if (typeof component.selectedIndex === 'string')
+                    return parseInt(component.selectedIndex, 10);
+                if (typeof component.selectedIndex === 'number')
+                    return component.selectedIndex;
+                return 0;
+            }
+
+            /// When selected item is not in the filtered items list, select the first item.
+            function _whenSelectedItemIsNotInFilteredItemsSelectFirstItem(filteredItems) {
+                if (component.navigable && !_contains(filteredItems, component.selecteditem)) {
+                    _setSelectedIndex(filteredItems, 0);
+                }
             }
 
             Polymer({
@@ -90,42 +76,42 @@
                     // Sometimes the {{items}} passed in is a JSON string and not an Array Object,
                     // in those cases we just parse it as JSON to make it an Array Object.
                     component.items = typeof component.items === 'string' ? JSON.parse(component.items) : component.items || [];
+                    component.filteredItems = component.items || [];
                 },
-                filterItems: function (items, filterText) {
-                    if (!filterText) return items;
-                    if (!items) return [];
+                filtertextChanged: function (oldText, newText) {
+                    component.filteredItems = newText === '' ? component.items : component.filterItems(newText) || [];
+                },
+                filterItems: function (filterText) {
+                    if (!filterText) return component.items;
+                    if (!component.items) return [];
 
                     // Filter values
-                    var filteredItems = _filterItems(items, function (item) {
+                    var filteredItems = _filterItems(component.items, function (item) {
                         // If its an exact match we don't want to show that one as a suggestion.
                         return item.text === filterText ? false : _contains(item.text, filterText);
                     });
 
-                    if (component.navigable && !_contains(filteredItems, component.selecteditem)) {
-                        _selectIndex(component, filteredItems, 0);
-                    }
+                    _whenSelectedItemIsNotInFilteredItemsSelectFirstItem(filteredItems);
 
                     return  filteredItems;
                 },
                 selectIndex: function (index) {
                     if (!component.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to set selected index.');
-                    _selectIndex(component, component.items, index);
+                    _setSelectedIndex(index);
                 },
                 selectNext: function () {
                     if (!component.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to select next index.');
-                    var result = _setNextIndex(component);
-                    component.items[result.oldIndex].selected = false;
-                    var selectedItem = component.items[result.newIndex];
-                    selectedItem.selected = true;
-                    component.selecteditem = selectedItem;
+                    if (component.selecteditem) component.selecteditem.selected = false;
+                    var currentIndex = component.selecteditem ? component.filteredItems.indexOf(component.selecteditem) : 0;
+                    var nextIndex = currentIndex < component.filteredItems.length ? currentIndex + 1 : 0;
+                    _setSelectedIndex(component.filteredItems, nextIndex);
                 },
                 selectPrev: function () {
                     if (!component.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to select previous index.');
-                    var result = _setPrevIndex(component);
-                    component.items[result.oldIndex].selected = false;
-                    var selectedItem = component.items[result.newIndex];
-                    selectedItem.selected = true;
-                    component.selecteditem = selectedItem;
+                    if (component.selecteditem) component.selecteditem.selected = false;
+                    var currentIndex = component.selecteditem ? component.filteredItems.indexOf(component.selecteditem) : 0;
+                    var prevIndex = currentIndex > 0 ? currentIndex - 1 : component.filteredItems.length - 1;
+                    _setSelectedIndex(component.filteredItems, prevIndex);
                 }
             });
         }());
