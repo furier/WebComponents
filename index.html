@@ -8,35 +8,42 @@
     <script src="bower_components/platform/platform.js"></script>
 
     <!--STYLING / CSS-->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="docs.min.css">
     <link rel="stylesheet" href="bower_components/github-fork-ribbon-css/gh-fork-ribbon.css">
     <style>
         html, body {
             height: 100%;
         }
+
         .wc-header, .wc-footer {
             color: #ffffff;
             background: #383f47;
             width: 100%;
         }
+
         .wc-footer {
             height: 200px;
         }
+
         .wc-component {
             width: 100%;
             padding: 50px 0;
         }
+
         .wc-component:nth-child(even) {
             background: #ffffff;
         }
+
         .wc-component:nth-child(odd) {
-            background: #ecf0f1;
+            background: #dedede;
         }
+
         .wc-header > div > h1 {
             margin-top: 49px;
             margin-bottom: 49px;
         }
+
         .center-github-card {
             display: block;
             width: 265px;
@@ -52,114 +59,121 @@
 </head>
 <body unresolved ng-app="WebComponents">
 
-    <!--FORK ME ON GITHUB RIBBON-->
-    <div class="github-fork-ribbon-wrapper left">
-        <div class="github-fork-ribbon">
-            <a href="http://furier.github.io/WebComponents">Fork me on GitHub</a>
-        </div>
+
+<!--FORK ME ON GITHUB RIBBON-->
+<div class="github-fork-ribbon-wrapper left">
+    <div class="github-fork-ribbon">
+        <a href="http://furier.github.io/WebComponents">Fork me on GitHub</a>
     </div>
+</div>
 
 
-    <!--HEADER-->
-    <div class="container wc-header">
-        <div class="container">
-            <h1>WebComponents</h1>
-        </div>
+<!--HEADER-->
+<div class="container wc-header">
+    <div class="container">
+        <h1>WebComponents</h1>
     </div>
+</div>
 
 
-    <!--SCHEDULER - COMPONENT-->
-    <div class="wc-component">
-        <div class="container">
-            <div ng-controller="schedulerCtrl">
-                <h2>Scheduler</h2>
-                <p>With the scheduler component, scheduling cron jobs is a breeze!</p>
-                <div class="bs-example">
-                    <ss-scheduler cronvalue="{{time}}" bind-polymer></ss-scheduler>
-                </div>
-                <div class="highlight">
-                    <code class="html">
+<!--SCHEDULER - COMPONENT-->
+<div class="wc-component">
+    <div class="container">
+        <div ng-controller="schedulerCtrl">
+            <h2>Scheduler</h2>
+
+            <p>With the scheduler component, scheduling cron jobs is a breeze!</p>
+
+            <div class="bs-example">
+                <ss-scheduler cronvalue="{{time}}" bind-polymer></ss-scheduler>
+            </div>
+            <div class="highlight">
+                <code class="html">
                     <pre>
                         &lt;ss-scheduler cronvalue=&quot;{{time}}&quot;&gt;&lt;/ss-scheduler&gt;
                     </pre>
-                    </code>
-                </div>
+                </code>
             </div>
         </div>
     </div>
+</div>
 
 
-    <!--TYPEAHEAD - COMPONENT-->
-    <div class="wc-component">
-        <div class="container">
-            <div ng-controller="typeaheadCtrl">
-                <h2>Typeahead</h2>
-                <p>lorum ipsum text!</p>
-                <div class="bs-example">
-                    <ss-typeahead placeholder="Typeahead" text="{{text}}" items="{{items}}" bind-polymer></ss-typeahead>
-                </div>
-                <div class="highlight">
-                    <code class="html">
+<!--TYPEAHEAD - COMPONENT-->
+<div class="wc-component">
+    <div class="container">
+        <div ng-controller="typeaheadCtrl">
+            <h2>Typeahead</h2>
+
+            <p>This component is work in progress, not yet working!</p>
+
+            <div class="bs-example">
+                <ss-typeahead placeholder="Typeahead" text="{{text}}" items="{{items}}" jump-to-last-occurrence-of="/" bind-polymer></ss-typeahead>
+            </div>
+            <div class="highlight">
+                <code class="html">
                     <pre>
-                        &lt;ss-typeahead placeholder=&quot;...&quot; text=&quot;...&quot; items=&quot;...&quot;&gt;&lt;/ss-typeahead&gt;
+                        &lt;ss-typeahead placeholder=&quot;...&quot; text=&quot;...&quot; items=&quot;...&quot; jump-to-last-occurrence-of=&quot;/&quot; &gt;&lt;/ss-typeahead&gt;
                     </pre>
-                    </code>
-                </div>
+                </code>
             </div>
         </div>
     </div>
+</div>
 
 
-    <!--AUTHOR GITHUB CARD-->
-    <div class="wc-component">
-        <div class="center-github-card">
-            <h3>Author</h3>
-            <github-card user="furier"></github-card>
-        </div>
+<!--AUTHOR GITHUB CARD-->
+<div class="wc-component">
+    <div class="center-github-card">
+        <h3>Author</h3>
+        <github-card user="furier"></github-card>
     </div>
+</div>
 
 
-    <footer class="wc-footer">
+<footer class="wc-footer">
 
-    </footer>
+</footer>
 
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular.min.js"></script>
-    <script src="bower_components/angular-bind-polymer/angular_bind_polymer.js"></script>
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="bower_components/angular/angular.min.js"></script>
+<script src="bower_components/angular-bind-polymer/angular_bind_polymer.js"></script>
+<script>
 
-    <script>
+    angular.module('WebComponents', ['eee-c.angularBindPolymer'])
+            .controller('schedulerCtrl', function ($scope) {
 
-        angular.module('WebComponents', ['eee-c.angularBindPolymer'])
-                .controller('schedulerCtrl', function ($scope) {
+                $scope.time = '0 0 0 0 *';
 
-                    $scope.time = '0 0 0 0 *';
+            })
+            .controller('typeaheadCtrl', function ($scope) {
 
-                })
-                .controller('typeaheadCtrl', function ($scope) {
+                $scope.text = '';
+                $scope.items = [
+                    {
+                        type: 'list-group-item-success',
+                        text: 'success'
+                    },
+                    {
+                        text: 'normal'
+                    },
+                    {
+                        type: 'list-group-item-info',
+                        text: 'info'
+                    },
+                    {
+                        type: 'list-group-item-warning',
+                        text: 'warning'
+                    },
+                    {
+                        type: 'list-group-item-danger',
+                        text: 'danger'
+                    }
+                ];
 
-                    $scope.text = '';
-                    $scope.items = [
-                        {
-                            type: 'list-group-item-success',
-                            text: 'success'
-                        },
-                        {
-                            type: 'list-group-item-info',
-                            text: 'info'
-                        },
-                        {
-                            type: 'list-group-item-warning',
-                            text: 'warning'
-                        },
-                        {
-                            type: 'list-group-item-danger',
-                            text: 'danger'
-                        }
-                    ];
+            });
 
-                });
-
-    </script>
+</script>
 </body>
 </html>

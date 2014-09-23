@@ -4,9 +4,11 @@
     <template>
 
         <!--STYLING / CSS-->
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../../bower_components/bootstrap/dist/css/bootstrap.min.css">
         <style>
-
+        .form-group {
+            margin-right: 10px;
+        }
         </style>
 
         <!--SEMANTICS-->
@@ -77,6 +79,7 @@
                         <option value="{{h}}">{{h}}</option>
                     </template>
                 </select>
+                :
                 <select class="form-control" selectedIndex="{{selectedMinute}}" on-change="{{onChange}}">
                     <template repeat="{{m in minutes}}">
                         <option value="{{m}}">{{m}}</option>
@@ -104,11 +107,11 @@
 
         (function () {
             var MINUTE = 0,
-                    HOUR = 1,
-                    DAY = 2,
-                    WEEK = 3,
-                    MONTH = 4,
-                    YEAR = 5;
+                HOUR = 1,
+                DAY = 2,
+                WEEK = 3,
+                MONTH = 4,
+                YEAR = 5;
 
             var daysInEachMonth = {
                 1: 31,
@@ -125,10 +128,14 @@
                 12: 31
             };
 
+            var ordinalDays = ['1st', '2th', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th',
+                        '11th', '12th', '13th', '14th', '15th', '16th', '17th', '18th', '19th', '20th',
+                        '21st', '22th', '23rd', '24th', '25th', '26th', '27th', '28th', '29th', '30th', '31st'];
+
             function generateDaysOptions(count) {
                 var days = [];
-                for (var i = 1; i <= daysInEachMonth[count]; i++) {
-                    days.push(i);
+                for (var i = 0; i < daysInEachMonth[count]; i++) {
+                    days.push(ordinalDays[i]);
                 }
                 return days;
             }
@@ -163,17 +170,17 @@
                 if (v.length === 5) {
 
                     if (v[4] !== '*')
-                        this.selectedEvery = 3;
+                        this.selectedEvery = WEEK;
                     else if (v[3] !== '*')
-                        this.selectedEvery = 5;
+                        this.selectedEvery = YEAR;
                     else if (v[2] !== '*')
-                        this.selectedEvery = 4;
+                        this.selectedEvery = MONTH;
                     else if (v[1] !== '*')
-                        this.selectedEvery = 2;
+                        this.selectedEvery = DAY;
                     else if (v[0] !== '*')
-                        this.selectedEvery = 1;
+                        this.selectedEvery = HOUR;
                     else
-                        this.selectedEvery = 0;
+                        this.selectedEvery = MINUTE;
 
                     this.selectedMinute = v[0] !== '*' ? v[0] : 0;
                     this.selectedHour = v[1] !== '*' ? v[1] : 0;
@@ -183,7 +190,7 @@
 
                 } else
                     throw new Error('cronValue was not provided in the correct format: ' + this.cronvalue + ', correct format is: "* * * * *".\n' +
-                            'Take a look @ http://en.wikipedia.org/wiki/Cron for more information.');
+                                    'Take a look @ http://en.wikipedia.org/wiki/Cron for more information.');
             }
 
             Polymer({
@@ -239,10 +246,14 @@
                             case MONTH:
                                 this.hideHourAndMinute = false;
                                 this.hideDay = false;
+                                this.days = generateDaysOptions(1);
                                 break;
                             case YEAR:
                                 this.hideHourAndMinute = false;
                                 this.hideMonthAndDay = false;
+                                this.days = generateDaysOptions(typeof this.selectedMonth === 'string'
+                                                                ? parseInt(this.selectedMonth, 10) + 1
+                                                                : 1);
                                 break;
                         }
                     }

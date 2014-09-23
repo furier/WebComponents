@@ -1,0 +1,25 @@
+{
+  "name": "polymer-keydown",
+  "version": "0.2.0",
+  "homepage": "https://github.com/dmytroyarmak/polymer-keydown",
+  "authors": [
+    "Dmytro Yarmak <dyarmak@heliostech.hk>"
+  ],
+  "description": "Component for listen to event on keydown for specific key code.",
+  "main": "polymer-keydown.html",
+  "keywords": [
+    "polymer",
+    "polymer elements",
+    "web components"
+  ],
+  "license": "MIT",
+  "_release": "0.2.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.2.0",
+    "commit": "1765f7ac6b5c3646097d62debbf1ba1b99207092"
+  },
+  "_source": "git://github.com/furier/polymer-keydown.git",
+  "_target": "~0.2.0",
+  "_originalSource": "furier/polymer-keydown"
+}

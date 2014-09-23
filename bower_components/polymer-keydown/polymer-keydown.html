@@ -1,0 +1,70 @@
+<!--
+/**
+ * @module Polymer Elements
+ */
+-->
+<!--
+/**
+ * polymer-keydown is used to listen for keydown of specific key code.
+ *
+ * Example:
+ *
+ *      <polymer-keydown code="37" on-keydown="{{nextSlide}}" />
+ *
+ * @class polymer-keydown
+ */
+/**
+ * Fired when a key with passed code was pressed.
+ *
+ * @event keydown
+ */
+-->
+<link rel="import" href="../polymer/polymer.html">
+
+<polymer-element name="polymer-keydown"  attributes="code">
+  <script>
+    (function() {
+      var originalHandler = window.onkeydown,
+          keyHandlers = Object.create(null),
+          isNaN = function(e) {
+            return (Object.prototype.toString.call(e) == '[object Number]') && (e != +e);
+          };
+
+      window.onkeydown = function checkKey(e) {
+        e = e || window.event;
+        var handlers = keyHandlers[e.keyCode];
+
+        if (handlers) {
+          handlers.forEach(function(element){
+            element.fire('keydown', {
+              originalEvent: e
+            });
+          });
+        }
+
+        if (originalHandler) {
+          originalHandler.apply(window, arguments);
+        }
+      };
+
+      Polymer('polymer-keydown', {
+      /**
+       * Code of key for listen to.
+       *
+       * @attribute code
+       * @type number
+       * @default NaN
+       */
+        code: NaN,
+
+        ready: function() {
+          var code = this.code;
+          if (!isNaN(code)) {
+            keyHandlers[code] = keyHandlers[code] || [];
+            keyHandlers[code].push(this);
+          }
+        }
+      });
+    })();
+  </script>
+</polymer-element>

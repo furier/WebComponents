@@ -1,23 +1,119 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html"/>
-<link rel="import" href="ss-list.html"/>
 
-<polymer-element name="ss-list-group" attributes="items">
+<polymer-element name="ss-list-group" attributes="items filtertext navigable">
     <template>
 
         <!--STYLING / CSS-->
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../../bower_components/bootstrap/dist/css/bootstrap.min.css">
 
         <!--SEMANTICS-->
-        <ss-list>
-            <template repeat="{{item in items}}">
-                <li class="list-group-item {{item.type}}">{{item.text}}</li>
+        <ul id="listGroup" class="list-group">
+            <template repeat="{{item in filteredItems}}">
+                <li id="item" class="list-group-item {{item.type}} {{{active: item.selected} | tokenList}}">
+                    {{item.text}}
+                </li>
             </template>
-        </ss-list>
+        </ul>
 
     </template>
     <script>
         (function () {
-            Polymer({});
+            var component;
+
+            function _filterItems(items, callback) {
+                if (!items) return [];
+                var matches = [];
+                for (var i = 0; i < items.length; i++) {
+                    if (callback(items[i]))
+                        matches.push(items[i]);
+                }
+                return matches;
+            }
+
+            function _contains(list, item) {
+                return list.indexOf(item) > -1;
+            }
+
+            function _setSelectedIndex(filteredItems, index) {
+                component.selectedIndex = index;
+                component.items.forEach(function (item) {
+                    item.selected = false;
+                });
+                var selectedItem = filteredItems[index];
+                if (!selectedItem) {
+                    selectedItem = component.items[0];
+                }
+                selectedItem.selected = true;
+                component.selecteditem = selectedItem;
+            }
+
+            function _getSelectedIndex() {
+                if (typeof component.selectedIndex === 'string')
+                    return parseInt(component.selectedIndex, 10);
+                if (typeof component.selectedIndex === 'number')
+                    return component.selectedIndex;
+                return 0;
+            }
+
+            /// When selected item is not in the filtered items list, select the first item.
+            function _whenSelectedItemIsNotInFilteredItemsSelectFirstItem(filteredItems) {
+                if (component.navigable && !_contains(filteredItems, component.selecteditem)) {
+                    _setSelectedIndex(filteredItems, 0);
+                }
+            }
+
+            Polymer({
+                publish: {
+                    selecteditem: {
+                        value: null,
+                        reflect: true
+                    }
+                },
+                created: function () {
+                    component = this;
+                },
+                domReady: function() {
+                    // Sometimes the {{items}} passed in is a JSON string and not an Array Object,
+                    // in those cases we just parse it as JSON to make it an Array Object.
+                    component.items = typeof component.items === 'string' ? JSON.parse(component.items) : component.items || [];
+                    component.filteredItems = component.items || [];
+                },
+                filtertextChanged: function (oldText, newText) {
+                    component.filteredItems = newText === '' ? component.items : component.filterItems(newText) || [];
+                },
+                filterItems: function (filterText) {
+                    if (!filterText) return component.items;
+                    if (!component.items) return [];
+
+                    // Filter values
+                    var filteredItems = _filterItems(component.items, function (item) {
+                        // If its an exact match we don't want to show that one as a suggestion.
+                        return item.text === filterText ? false : _contains(item.text, filterText);
+                    });
+
+                    _whenSelectedItemIsNotInFilteredItemsSelectFirstItem(filteredItems);
+
+                    return  filteredItems;
+                },
+                selectIndex: function (index) {
+                    if (!component.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to set selected index.');
+                    _setSelectedIndex(index);
+                },
+                selectNext: function () {
+                    if (!component.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to select next index.');
+                    if (component.selecteditem) component.selecteditem.selected = false;
+                    var currentIndex = component.selecteditem ? component.filteredItems.indexOf(component.selecteditem) : 0;
+                    var nextIndex = currentIndex < component.filteredItems.length ? currentIndex + 1 : 0;
+                    _setSelectedIndex(component.filteredItems, nextIndex);
+                },
+                selectPrev: function () {
+                    if (!component.navigable) throw new Error('ss-list-group: set attribute navigable="true" to be able to select previous index.');
+                    if (component.selecteditem) component.selecteditem.selected = false;
+                    var currentIndex = component.selecteditem ? component.filteredItems.indexOf(component.selecteditem) : 0;
+                    var prevIndex = currentIndex > 0 ? currentIndex - 1 : component.filteredItems.length - 1;
+                    _setSelectedIndex(component.filteredItems, prevIndex);
+                }
+            });
         }());
     </script>
 </polymer-element>
