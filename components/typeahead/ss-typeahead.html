@@ -138,12 +138,16 @@
 
                     component.$.listGroup.selectIndex(0);
                 },
-                nextSuggestion: function () {
+                nextSuggestion: function (e) {
                     if (component.hideSuggestions) return;
+                    e.detail.originalEvent.preventDefault();
+
                     component.$.listGroup.selectNext();
                 },
-                previousSuggestion: function () {
+                previousSuggestion: function (e) {
                     if (component.hideSuggestions) return;
+                    e.detail.originalEvent.preventDefault();
+
                     component.$.listGroup.selectPrev();
                 }
             });

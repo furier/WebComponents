@@ -72,7 +72,7 @@
                 created: function () {
                     component = this;
                 },
-                ready: function() {
+                domReady: function() {
                     // Sometimes the {{items}} passed in is a JSON string and not an Array Object,
                     // in those cases we just parse it as JSON to make it an Array Object.
                     component.items = typeof component.items === 'string' ? JSON.parse(component.items) : component.items || [];
